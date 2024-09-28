@@ -1,0 +1,12 @@
+database:
+  name: test
+  host: "127.0.0.1"
+  port: 3306
+  user: root
+  pass: 123456
+// 我个人用的数据库↑
+
+
+enccryptokey: "12345678901234567890123456789012"
+// 仅供参考↑
+
