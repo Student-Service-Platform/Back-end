@@ -1,4 +1,4 @@
-package api
+package controllers
 
 import (
 	"Back-end/services"
@@ -13,9 +13,9 @@ import (
 // 注册功能等等再写，邮件那个东西要整的有点多
 
 type loginData struct {
-	Username string `json:"username" binding:"required"`
+	UserID   string `json:"user_id" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Isadmin  bool   `json:"isadmin" binding:"required"`
+	IsAdmin  bool   `json:"is_admin"`
 }
 
 func Login(ctx *gin.Context) {
@@ -23,20 +23,20 @@ func Login(ctx *gin.Context) {
 	// 解析参数并且绑定到 struct 中
 	err := ctx.ShouldBindJSON(&data)
 	if err != nil {
-		utils.JsonResponse(ctx, 200, 200503, "参数错误", nil)
 		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200503, "参数错误", nil)
 		return
 	}
 
 	// 管理员/普通用户登录
 	var table string
-	if data.Isadmin {
-		table = "admin"
+	if data.IsAdmin {
+		table = "admins"
 	} else {
-		table = "student"
+		table = "students"
 	}
 
-	err = services.CheckUserExistByUserName(data.Username, table)
+	err = services.CheckUserExistByUserID(data.UserID, table)
 	if err != nil { //如果发生了错误
 		if err == gorm.ErrRecordNotFound { //如果是未找到
 			utils.JsonResponse(ctx, 200, 200505, "你这学号有问题啊", nil)
@@ -47,7 +47,7 @@ func Login(ctx *gin.Context) {
 		}
 	} else { //用户存在，检测过程中没有出现错误
 		//确认用户存在后再检测密码
-		user, err := services.GetUserByUserName(data.Username, table)
+		user, err := services.GetUserByUserID(data.UserID, table)
 
 		if err != nil {
 			utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", nil)
@@ -59,9 +59,9 @@ func Login(ctx *gin.Context) {
 				utils.JsonResponse(ctx, 200, 200504, "你这密码有问题啊", nil)
 			} else {
 				utils.JsonResponse(ctx, 200, 200200, "登录成功", gin.H{
-					"username": user.Username,
+					"username": user.UserId,
 					"type":     user.Type,
-					"token":    utils.GenerateJWT(user.Username, user.Type),
+					"token":    utils.GenerateJWT(user.UserId, user.Type),
 				})
 			}
 		}

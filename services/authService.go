@@ -13,22 +13,22 @@ type UserInfo struct {
 	UserID string
 }
 
-func CheckUserExistByUserName(username string, table string) error {
-	result := database.DB.Table(table).Where("username = ?", username).First(&UserInfo{})
+func CheckUserExistByUserID(UserId string, table string) error {
+	result := database.DB.Table(table).Where("user_id = ?", UserId).First(&UserInfo{})
 	utils.LogError(result.Error)
 	return result.Error
 }
 
 // 获取用户的函数
 type LoginInfo struct {
-	Username string
+	UserId   string
 	Password string
 	Type     int
 }
 
-func GetUserByUserName(username string, table string) (*LoginInfo, error) {
+func GetUserByUserID(UserId string, table string) (*LoginInfo, error) {
 	var userinfo LoginInfo
-	result := database.DB.Table(table).Where("username = ?", username).First(&LoginInfo{})
+	result := database.DB.Table(table).Where("user_id = ?", UserId).First(&LoginInfo{})
 	if result.Error != nil {
 		return nil, result.Error
 	}

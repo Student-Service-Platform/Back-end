@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -13,7 +14,7 @@ var logger zerolog.Logger
 
 func init() {
 	// 创建日志文件夹
-	logDir := "/log"
+	logDir := "./log"
 	if _, err := os.Stat(logDir); os.IsNotExist(err) {
 		os.Mkdir(logDir, os.ModePerm)
 	}
@@ -27,12 +28,16 @@ func init() {
 
 	// 初始化 zerolog
 	logger = zerolog.New(file).With().Timestamp().Logger()
+
+	// 设置全局日志记录器
+	log.Logger = logger
 }
 
 // LogError 记录错误信息和发生时间
 func LogError(err error) {
 	if err != nil {
-		logger.Error().Time("time", time.Now()).Err(err).Msg("发生错误")
+		log.Error().Time("time", time.Now()).Err(err).Msg("发生错误")
+		fmt.Printf("Error: %v\n", err) // 添加调试信息
 	}
 }
 

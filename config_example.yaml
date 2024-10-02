@@ -4,12 +4,8 @@ database:
   port: 3306
   user: root
   pass: 123456
-// 我个人用的数据库↑
-
 
 enccryptokey: "12345678901234567890123456789012"
-// 仅供参考↑
 
 jwt:
   secret: this_is_a_secret_sample
-// 仅供参考↑
