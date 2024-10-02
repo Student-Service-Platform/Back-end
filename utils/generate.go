@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(username string, userType int) (string, error) {
+func GenerateJWT(username string, userType int) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"authorized": true,
 		"username":   username,
@@ -17,8 +17,9 @@ func GenerateJWT(username string, userType int) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(config.Config.GetString("jwt.secret")))
 	if err != nil {
-		return "", err
+		LogError(err)
+		return ""
 	}
-
-	return tokenString, nil
+	LogError(err)
+	return tokenString
 }
