@@ -10,3 +10,6 @@ database:
 enccryptokey: "12345678901234567890123456789012"
 // 仅供参考↑
 
+jwt:
+  secret: this_is_a_secret_sample
+// 仅供参考↑

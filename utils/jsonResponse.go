@@ -8,7 +8,7 @@ import (
 
 // 基本的响应模板
 func JsonResponse(ctx *gin.Context, httpStatusCode int, code int, msg string, data interface{}) {
-	ctx.JSON(httpStatusCode, gin.H{
+	ctx.JSON(httpStatusCode, gin.H{ // httpsStatusCode是http的状态码，只有200和500之分
 		"code": code, //六位的代码，应该是200+XXX的格式，如果没有出错就200，出错一般200+XXX
 		"data": data, //返回的数据
 		"msg":  msg,  //返回的消息，默认是success

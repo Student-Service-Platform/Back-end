@@ -1,7 +1,7 @@
 package database
 
 import (
-	"ServerPlatform/config"
+	"Back-end/config"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -39,11 +39,3 @@ func Init() {
 func GetDB() *gorm.DB {
 	return DB
 }
-
-// func Connect() (*sql.DB, error) {
-// 	db, err := sql.Open("mysql", "root:123@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local&tls=true&autocommit=true&clientFoundRows=true&allowNativePasswords=true&allowAllFiles=true&allowOldPasswords=true&allowPublicKeyRetrieval=true&maxAllowedPacket=0&readTimeout=0&writeTimeout=0&timeout=0&interpolateParams=true&charset=utf8mb4&collation=utf8mb4_unicode_ci&multiStatements=true&sql_mode='ALLOW_INVALID_DATES,STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return db, nil
-// }

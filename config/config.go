@@ -20,6 +20,5 @@ func init() {
 	if err != nil {
 		logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 		logger.Fatal().Msgf("Failed to load config: %s", err)
-
 	}
 }

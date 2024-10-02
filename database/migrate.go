@@ -1,7 +1,7 @@
 package database
 
 import (
-	"ServerPlatform/models"
+	"Back-end/models"
 	"os"
 
 	"github.com/rs/zerolog/log"

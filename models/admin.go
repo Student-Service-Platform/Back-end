@@ -2,7 +2,7 @@ package models
 
 import "gorm.io/gorm"
 
-type Admin_User struct {
+type Admin struct {
 	gorm.Model         //自行管理的created_at, updated_at, deleted_at
 	UserID     string  `json:"user_id"`
 	Name       string  `json:"name"`
