@@ -7,10 +7,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateJWT(username string, userType int) string {
+func GenerateJWT(userID string, userType int) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"authorized": true,
-		"username":   username,
+		"user_id":    userID,
 		"type":       userType,
 		"exp":        time.Now().Add(time.Hour * 1).Unix(),
 	})

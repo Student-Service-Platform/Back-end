@@ -14,8 +14,8 @@ type UserInfo struct {
 	UserID string
 }
 
-func CheckUserExistByUserID(UserId string, table string) error {
-	result := database.DB.Table(table).Where("user_id = ?", UserId).First(&UserInfo{})
+func CheckUserExistByUserID(UserID string, table string) error {
+	result := database.DB.Table(table).Where("user_id = ?", UserID).First(&UserInfo{})
 	utils.LogError(result.Error)
 	return result.Error
 }
@@ -48,14 +48,14 @@ func AddStudent(UserID string, Username string, RawPassword string) error {
 
 // 获取用户的函数
 type LoginInfo struct {
-	UserId   string
+	UserID   string
 	Password string
 	Type     int
 }
 
-func GetUserByUserID(UserId string, table string) (*LoginInfo, error) {
+func GetUserByUserID(UserID string, table string) (*LoginInfo, error) {
 	var userinfo LoginInfo
-	result := database.DB.Table(table).Where("user_id = ?", UserId).First(&userinfo)
+	result := database.DB.Table(table).Where("user_id = ?", UserID).First(&userinfo)
 	if result.Error != nil {
 		return nil, result.Error
 	}

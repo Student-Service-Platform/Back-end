@@ -110,9 +110,9 @@ func Login(ctx *gin.Context) {
 				utils.JsonResponse(ctx, 200, 200504, "你这密码有问题啊", nil)
 			} else {
 				utils.JsonResponse(ctx, 200, 200200, "登录成功", gin.H{
-					"username": user.UserId,
-					"type":     user.Type,
-					"token":    utils.GenerateJWT(user.UserId, user.Type),
+					"user_id": user.UserID,
+					"type":    user.Type,
+					"token":   utils.GenerateJWT(user.UserID, user.Type),
 				})
 			}
 		}
