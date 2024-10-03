@@ -3,6 +3,7 @@ package services
 import (
 	"Back-end/database"
 	"Back-end/utils"
+	"fmt"
 )
 
 type ReturnUserInfo struct {
@@ -13,6 +14,7 @@ type ReturnUserInfo struct {
 	Avatar   string `json:"avatar,omitempty"` // 头像，大概得是Url了
 }
 
+// 获取用户信息
 func GetProfileByID(userID string, table string) (ReturnUserInfo, error) {
 	var result ReturnUserInfo
 	err := database.DB.Table(table).Where("user_id = ?", userID).First(&result).Error
@@ -21,4 +23,14 @@ func GetProfileByID(userID string, table string) (ReturnUserInfo, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+// 更新用户信息
+func UpdateProfile(userID, table, object, value string) error {
+	if table != "students" && table != "admins" {
+		return fmt.Errorf("invalid table name: %s", table)
+	}
+
+	result := database.DB.Table(table).Where("user_id = ?", userID).UpdateColumn(object, value)
+	return result.Error
 }

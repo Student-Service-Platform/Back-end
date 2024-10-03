@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"Back-end/config"
+	"Back-end/services"
 	"Back-end/utils"
 	"fmt"
 	"net/http"
@@ -58,7 +59,7 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		if err != nil || !token.Valid {
 			// 如果 JWT 验证失败，返回 401 Unauthorized 错误
 			utils.LogError(err)
-			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息有误"})
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息校验失败"})
 			c.Abort()
 			return
 		}
@@ -67,7 +68,30 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			// 如果 JWT 的 claims 无效，返回 401 Unauthorized 错误
-			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息无效"})
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息（claims）无效"})
+			c.Abort()
+			return
+		}
+
+		// 检查 user_id 是否存在
+		userID := claims["user_id"].(string)
+		userType := int(claims["type"].(float64))
+		var table string
+		switch userType {
+		case 1:
+			table = "students"
+		case 2, 3:
+			table = "admins"
+		default:
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息（用户类型）无效"})
+			c.Abort()
+			return
+		}
+
+		if services.CheckUserExistByUserID(userID, table) != nil {
+			// 如果 user_id 不存在，返回 401 Unauthorized 错误
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息（用户ID）无效"})
+			utils.LogError(err)
 			c.Abort()
 			return
 		}

@@ -38,7 +38,7 @@ func AddStudent(UserID string, Username string, RawPassword string) error {
 		Phone:    "",
 		Mail:     "",
 		IfDel:    false,
-		Avatar:   "",
+		Avatar:   "https://imgse.com/i/pA89yOe",
 		Type:     1,
 	}
 

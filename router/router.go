@@ -20,7 +20,8 @@ func Init(r *gin.Engine) {
 	{
 		// 使用JWT中间件保护这些路由
 		apiUser.Use(middlewares.TokenAuthMiddleware())
-		apiUser.GET("profile", controllers.GetUserProfile)
+		apiUser.GET("profile", controllers.GetProfile)
+		apiUser.PUT("profile", controllers.UpdateProfile)
 		// 其他受保护的路由可以在这里添加
 	}
 }
