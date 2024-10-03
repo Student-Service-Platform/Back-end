@@ -15,11 +15,10 @@ type ReturnUserInfo struct {
 
 func GetProfileByID(userID string, table string) (ReturnUserInfo, error) {
 	var result ReturnUserInfo
-	err := database.DB.Table(table).Where("user_id = ?", userID).First(&ReturnUserInfo{}).Error
+	err := database.DB.Table(table).Where("user_id = ?", userID).First(&result).Error
 	if err != nil {
 		utils.LogError(err)
 		return result, err
-	} else {
-		return result, nil
 	}
+	return result, nil
 }

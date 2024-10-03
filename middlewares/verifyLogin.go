@@ -31,7 +31,7 @@ func VerifyJWT(tokenString string) (*jwt.Token, error) {
 	// 检查 JWT 是否有效
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		fmt.Println("Token is valid")
-		fmt.Println("Username:", claims["username"])
+		fmt.Println("UserID:", claims["user_id"])
 		fmt.Println("Type:", int(claims["type"].(float64))) // 注意这里需要将float64转换为int
 	} else {
 		fmt.Println("Invalid token")
@@ -45,9 +45,10 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从请求头中获取 Authorization 字段
 		tokenString := c.GetHeader("Authorization")
+		fmt.Println("Received Token:", tokenString) // 打印接收到的token
 		if tokenString == "" {
 			// 如果 Authorization 字段为空，返回 401 Unauthorized 错误
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "未登录"})
 			c.Abort()
 			return
 		}
@@ -56,7 +57,8 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		token, err := VerifyJWT(tokenString)
 		if err != nil || !token.Valid {
 			// 如果 JWT 验证失败，返回 401 Unauthorized 错误
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			utils.LogError(err)
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息有误"})
 			c.Abort()
 			return
 		}
@@ -65,13 +67,13 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			// 如果 JWT 的 claims 无效，返回 401 Unauthorized 错误
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息无效"})
 			c.Abort()
 			return
 		}
 
-		// 将解析得到的 username 和 type 参数传递给下一步命令
-		c.Set("username", claims["username"].(string))
+		// 将解析得到的 userID 和 type 参数传递给下一步命令
+		c.Set("userID", claims["user_id"].(string))
 		c.Set("type", int(claims["type"].(float64)))
 
 		// 继续处理请求

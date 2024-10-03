@@ -3,17 +3,21 @@ package controllers
 import (
 	"Back-end/services"
 	"Back-end/utils"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
 
 func GetUserProfile(ctx *gin.Context) {
-	currentUserID := ctx.GetString("user_id")
+	currentUserID := ctx.GetString("userID")
 	userType := ctx.GetInt("type")
 	targetUserID := ctx.Query("user_id")
+
 	if targetUserID == "" {
 		targetUserID = currentUserID
 	}
+
+	fmt.Print(targetUserID)
 
 	var result services.ReturnUserInfo
 	var err error
@@ -25,7 +29,7 @@ func GetUserProfile(ctx *gin.Context) {
 		if err != nil {
 			utils.JsonResponse(ctx, 200, 200506, "这真是让人尴尬，请坐和放宽。", nil)
 		} else {
-			utils.JsonResponse(ctx, 200, 200200, "成功获取用户信息", gin.H{
+			utils.JsonResponse(ctx, 200, 200200, "success", gin.H{
 				"user_id": result.UserID,
 				"name":    result.Username,
 				"phone":   result.Phone,
@@ -41,7 +45,7 @@ func GetUserProfile(ctx *gin.Context) {
 		if err != nil {
 			utils.JsonResponse(ctx, 200, 200506, "这真是让人尴尬，请坐和放宽。", nil)
 		} else {
-			utils.JsonResponse(ctx, 200, 200200, "成功获取用户信息", gin.H{
+			utils.JsonResponse(ctx, 200, 200200, "success", gin.H{
 				"user_id": result.UserID,
 				"name":    result.Username,
 				"phone":   result.Phone,

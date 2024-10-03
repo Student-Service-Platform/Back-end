@@ -19,5 +19,5 @@ func autoMigrate(db *gorm.DB) error {
 	}
 	logger := log.With().Str("module", "database").Logger()
 	logger.Error().Err(err).Msg("An error occurred in Database")
-	return nil
+	return err
 }
