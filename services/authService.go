@@ -3,6 +3,7 @@ package services
 // 这个文件处理：注册，登录
 import (
 	"Back-end/database"
+	"Back-end/models"
 	"Back-end/utils"
 
 	"golang.org/x/crypto/bcrypt"
@@ -19,6 +20,32 @@ func CheckUserExistByUserID(UserId string, table string) error {
 	return result.Error
 }
 
+// 添加学生用户
+var NewStudent models.Student
+
+func AddStudent(UserID string, Username string, RawPassword string) error {
+	// 密码加密
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(RawPassword), bcrypt.DefaultCost)
+	if err != nil {
+		utils.LogError(err)
+		return err
+	}
+
+	NewStudent = models.Student{
+		UserID:   UserID,
+		Username: Username,
+		Password: string(hashedPassword),
+		Phone:    "",
+		Mail:     "",
+		IfDel:    false,
+		Avatar:   "",
+		Type:     1,
+	}
+
+	result := database.DB.Table("students").Create(&NewStudent)
+	return result.Error
+}
+
 // 获取用户的函数
 type LoginInfo struct {
 	UserId   string
@@ -28,7 +55,7 @@ type LoginInfo struct {
 
 func GetUserByUserID(UserId string, table string) (*LoginInfo, error) {
 	var userinfo LoginInfo
-	result := database.DB.Table(table).Where("user_id = ?", UserId).First(&LoginInfo{})
+	result := database.DB.Table(table).Where("user_id = ?", UserId).First(&userinfo)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -38,5 +65,6 @@ func GetUserByUserID(UserId string, table string) (*LoginInfo, error) {
 // 比对密码
 func CheckPassword(pwdinput string, pwddb string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(pwddb), []byte(pwdinput))
+	utils.LogError(err)
 	return err == nil
 }

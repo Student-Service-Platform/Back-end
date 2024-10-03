@@ -12,7 +12,7 @@ func Init(r *gin.Engine) {
 	apiUni := r.Group(pre)
 	{
 		apiUni.POST("login", controllers.Login)
-		// apiUni.POST("/reg", controllers.Register)
+		apiUni.POST("reg", controllers.Register)
 		// apiUni.GET("/info", middleware.AuthMiddleware(), controllers.Info)
 	}
 	// const std = "/api/student"
@@ -32,4 +32,6 @@ func Init(r *gin.Engine) {
 	// 	apiAdm.GET("/report", controllers.GetPendingApproval)
 	// 	apiAdm.POST("/report", controllers.HandleReport)
 	// }
+
+	const user = "/api/user"
 }
