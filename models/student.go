@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 // Student 学生
 type Student struct {
 	gorm.Model
-	UserID   string `json:"user_id"`          // 学号，学号
+	UserID   string `json:"user_id" gorm:"index"` // 学号，学号
 	Username string `json:"username"`         // 姓名，用户名(显示名称)
 	Password string `json:"-"`                // 密码
 	Phone    string `json:"phone,omitempty"`  // 手机号，联系方式2（选填，预留接口）

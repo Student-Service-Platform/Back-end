@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 // Request
 type Request struct {
 	gorm.Model
-	UserID       string `json:"user_id"`              // 发起人id
+	UserID string `gorm:"foreignKey:UserID;references:user_id"`
 	Title        string `json:"title"`                // 反馈标题，反馈标题
 	Description  string `json:"description"`          // 反馈内容
 	Category     int64  `json:"category,omitempty"`   // 反馈问题类别，标签

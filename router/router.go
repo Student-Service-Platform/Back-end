@@ -15,7 +15,7 @@ func Init(r *gin.Engine) {
 		apiAuth.POST("login", controllers.Login)
 		apiAuth.POST("reg", controllers.Register)
 	}
-	const user = "/api/user" //查看用户信息/修改信息/获取发送的反馈/反馈问题/回复反馈帖子/评价
+	const user = "/api/user" //查看用户信息/修改信息/反馈问题/回复反馈帖子/评价
 	apiUser := r.Group(user)
 	{
 		// 使用JWT中间件保护这些路由
@@ -25,4 +25,5 @@ func Init(r *gin.Engine) {
 		apiUser.POST("feedback", controllers.CreateRequest)
 		// 其他受保护的路由可以在这里添加
 	}
+	r.GET("/user/feedback", controllers.GetRequest)
 }
