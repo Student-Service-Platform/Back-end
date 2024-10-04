@@ -32,6 +32,7 @@ func Init(r *gin.Engine) {
 	apiReply := r.Group(feedback)
 	{
 		apiReply.Use(middlewares.TokenAuthMiddleware())
-		apiReply.POST("reply", controllers.ReplyRequest)
+		apiReply.POST(":id/reply", controllers.ReplyRequest)
+		apiReply.POST(":id/admin", controllers.HandleRequst)
 	}
 }

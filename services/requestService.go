@@ -26,7 +26,7 @@ type formatRequest struct {
 	Status       bool   `json:"status"`
 }
 
-// 不加用户信息，获取所有的
+// / 不加用户信息，获取所有的
 func GetAllRequest(offset int, limit int) ([]formatRequest, error) {
 	requests := make([]formatRequest, 0)
 	err := database.DB.Offset(offset).Limit(limit).Find(&requests).Error
@@ -35,7 +35,7 @@ func GetAllRequest(offset int, limit int) ([]formatRequest, error) {
 		return nil, err
 	}
 
-	// 处理匿名用户
+	//// 处理匿名用户
 	for i := range requests {
 		if requests[i].IsAnonymous {
 			requests[i].Username = "匿名用户"
@@ -45,7 +45,7 @@ func GetAllRequest(offset int, limit int) ([]formatRequest, error) {
 	return requests, nil
 }
 
-// 加用户信息，获取特定用户的不匿名
+// / 加用户信息，获取特定用户的不匿名
 func GetUserRequest(userid string, offset int, limit int) ([]formatRequest, error) {
 	var results []formatRequest
 
@@ -57,4 +57,24 @@ func GetUserRequest(userid string, offset int, limit int) ([]formatRequest, erro
 	} else {
 		return results, nil
 	}
+}
+
+// 管理员处理帖子的时候同步把UnderTakerID加上
+func HandleRequest(requestID int64, currentUserID string) error {
+	result := database.DB.Table("requests").Where("id = ?", requestID).UpdateColumn("undertaker_id", currentUserID)
+	return result.Error
+}
+
+// 看一下这个request被处理了没
+type HandleInfo struct {
+	UndertakerID string `json:"undertaker_id"`
+}
+
+func IsHandled(requestID int64) (string, error) {
+	var handleInfo HandleInfo
+	result := database.DB.Table("requests").Where("id = ?", requestID).Find(&handleInfo)
+	if result.Error != nil {
+		utils.LogError(result.Error)
+	}
+	return handleInfo.UndertakerID, result.Error
 }

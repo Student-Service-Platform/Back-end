@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 // 管理员回复反馈
@@ -40,17 +39,19 @@ func ReplyRequest(ctx *gin.Context) {
 	if 2 != userType && 3 != userType {
 		utils.JsonResponse(ctx, 200, 200401, "不要说我们没警告过你……你的权限不对", nil)
 	} else {
-		err = services.CheckRequestReplyExistByID(int64(intFeedbackID))
-		if err != nil && err != gorm.ErrRecordNotFound { //如果发生了错误
-			utils.JsonResponse(ctx, 200, 200503, "咱整了点问题，晚点再试吧", nil)
-		} else if err == nil { //如果找到了
+		existUserID, err := services.IsHandled(int64(intFeedbackID))
+		if nil != err {
+			utils.LogError(err)
+			utils.JsonResponse(ctx, 200, 200503, "没关系，我们都有不顺利的时候", nil)
+		} else if "" != existUserID || currentUserID != existUserID {
 			utils.JsonResponse(ctx, 200, 200510, "有回复在你之前赶到了！", nil)
 		} else {
 			//补齐struct然后塞进去，这里只负责传入相关信息
-			err = services.CreateRequestReply(content.Content, currentUserID, int64(intFeedbackID))
-			if err != nil {
+			err1, err2 := services.CreateRequestReply(content.Content, currentUserID, int64(intFeedbackID)), services.HandleRequest(int64(intFeedbackID), currentUserID)
+			if nil != err1 || nil != err2 {
 				utils.JsonResponse(ctx, 200, 200509, "出了点点问问题题题题", nil)
-				utils.LogError(err)
+				utils.LogError(err1)
+				utils.LogError(err2)
 			} else {
 				utils.JsonResponse(ctx, 200, 200200, "好东西就要来了！刷新查看（大概吧）", nil)
 			}

@@ -4,6 +4,7 @@ import (
 	"Back-end/models"
 	"Back-end/services"
 	"Back-end/utils"
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -120,4 +121,53 @@ func GetRequest(ctx *gin.Context) {
 	}
 }
 
-//
+// 接单函数（好没有存在感的样子）
+func HandleRequst(ctx *gin.Context) {
+	currentFeedbackID := ctx.Param("id")
+	action := ctx.Query("action")
+	intFeedbackID, err := strconv.Atoi(currentFeedbackID)
+	if err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200503, "报告数数数据据据型错误", nil)
+		return
+	}
+	intaction, err := strconv.Atoi(action)
+	if err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200503, "报告数数数据据据型错误", nil)
+		return
+	}
+
+	currentUserID, userType, _, err := parseContext(ctx)
+	if err != nil {
+		utils.LogError(err)
+		return
+	}
+
+	switch userType {
+	case 2, 3: //确定由管理员权限后……
+		//先看接了没有，如果没有或者是自己改的，那就可以改
+		existUserID, err := services.IsHandled(int64(intFeedbackID))
+		if nil != err {
+			utils.LogError(err)
+			utils.JsonResponse(ctx, 200, 200503, "没关系，我们都有不顺利的时候", nil)
+		} else if existUserID != currentUserID {
+			utils.JsonResponse(ctx, 200, 200511, "有人在你之前遇见了！", nil)
+		} else {
+			if 1 == intaction {
+				err = services.HandleRequest(int64(intFeedbackID), currentUserID)
+			} else if 0 == intaction {
+				err = services.HandleRequest(int64(intFeedbackID), "")
+			} else {
+				utils.LogError(fmt.Errorf("坏东西来了：未指定的接单操作"))
+			}
+		}
+		break
+	default:
+		utils.JsonResponse(ctx, 200, 200401, "头抬起，你的权限不对", nil)
+		break
+	}
+
+}
+
+// 评价处理结果（是这个值是写在request里头的，以及要同步更新管理员那里的总分）
