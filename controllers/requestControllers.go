@@ -95,6 +95,7 @@ func GetRequest(ctx *gin.Context) {
 	if UserID == "" { //可以看得到所有的Request，包括匿名的
 		requests, err := services.GetAllRequest(offset, perPage)
 		if err != nil {
+			utils.LogError(err)
 			utils.JsonResponse(ctx, 200, 200504, "服务器出错，我们都有不顺利的时候，尝试在晚点", nil)
 		} else {
 			if len(requests) == 0 {
@@ -107,6 +108,7 @@ func GetRequest(ctx *gin.Context) {
 		//看特定用户的Request，不包括匿名的
 		requests, err := services.GetAllRequest(offset, perPage)
 		if err != nil {
+			utils.LogError(err)
 			utils.JsonResponse(ctx, 200, 200504, "服务器出错，我们都有不顺利的时候，尝试在晚点", nil)
 		} else {
 			if len(requests) == 0 {
@@ -117,3 +119,5 @@ func GetRequest(ctx *gin.Context) {
 		}
 	}
 }
+
+//

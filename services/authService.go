@@ -16,7 +16,9 @@ type UserInfo struct {
 
 func CheckUserExistByUserID(UserID string, table string) error {
 	result := database.DB.Table(table).Where("user_id = ?", UserID).First(&UserInfo{})
-	utils.LogError(result.Error)
+	if result.Error != nil {
+		utils.LogError(result.Error)
+	}
 	return result.Error
 }
 

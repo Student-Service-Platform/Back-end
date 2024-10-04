@@ -15,6 +15,7 @@ func Init(r *gin.Engine) {
 		apiAuth.POST("login", controllers.Login)
 		apiAuth.POST("reg", controllers.Register)
 	}
+
 	const user = "/api/user" //查看用户信息/修改信息/反馈问题/回复反馈帖子/评价
 	apiUser := r.Group(user)
 	{
@@ -25,5 +26,12 @@ func Init(r *gin.Engine) {
 		apiUser.POST("feedback", controllers.CreateRequest)
 		// 其他受保护的路由可以在这里添加
 	}
-	r.GET("/user/feedback", controllers.GetRequest)
+	r.GET("/api/user/feedback", controllers.GetRequest)
+
+	const feedback = "/api/feedback"
+	apiReply := r.Group(feedback)
+	{
+		apiReply.Use(middlewares.TokenAuthMiddleware())
+		apiReply.POST("reply", controllers.ReplyRequest)
+	}
 }
