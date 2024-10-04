@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// userController 用户控制器，用户对于自己信息的增删改查
+
 // 解析中间件传递的上下文信息
 func parseContext(ctx *gin.Context) (string, int, string, error) {
 	currentUserID := ctx.GetString("userID")
@@ -23,7 +25,7 @@ func parseContext(ctx *gin.Context) (string, int, string, error) {
 		utils.JsonResponse(ctx, 200, 401, "需要滚回到以前的用户类型", nil)
 		return "", 0, "", fmt.Errorf("用户类型无效")
 	}
-
+	// 获取用户信息直接 currentUserID, userType, table, err := parseContext(ctx)
 	return currentUserID, userType, table, nil
 }
 

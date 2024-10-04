@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// AuthAPI 负责处理用户注册、登录和信息修改后的操作
+// AuthAPI 负责处理用户注册、登录的操作
 
 // 注册功能等等再完善，邮件那个东西要整的有点多，我这里只写了基本的学号+用户名+密码的模式，但是测试应该够用了
 type registerData struct {

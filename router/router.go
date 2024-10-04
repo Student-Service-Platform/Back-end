@@ -22,6 +22,7 @@ func Init(r *gin.Engine) {
 		apiUser.Use(middlewares.TokenAuthMiddleware())
 		apiUser.GET("profile", controllers.GetProfile)
 		apiUser.PUT("profile", controllers.UpdateProfile)
+		apiUser.POST("feedback", controllers.CreateRequest)
 		// 其他受保护的路由可以在这里添加
 	}
 }
