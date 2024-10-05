@@ -10,7 +10,7 @@ import (
 )
 
 func autoMigrate(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.Student{}, &models.Request{}, &models.Reply{}, &models.Admin{})
+	err := db.AutoMigrate(&models.Student{}, &models.Admin{}, &models.Request{}, &models.Reply{})
 
 	file, _ := os.OpenFile("./log/log.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	defer file.Close()

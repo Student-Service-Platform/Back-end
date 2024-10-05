@@ -22,9 +22,9 @@ type RequestInfo struct {
 	CreatedAt   time.Time `json:"created_at"`  // 请求创建时间
 	Title       string    `json:"title"`       // 请求标题
 	Description string    `json:"description"` // 请求描述
-	Category    int64     `json:"category"`    // 请求类别
-	Urgency     int64     `json:"urgency"`     // 请求紧急程度
-	IfRubbish   int64     `json:"if_rubbish"`  // 是否为垃圾请求
+	Category    int       `json:"category"`    // 请求类别
+	Urgency     int       `json:"urgency"`     // 请求紧急程度
+	IfRubbish   int       `json:"if_rubbish"`  // 是否为垃圾请求
 	Undertaker  string    `json:"undertaker"`  // 负责人用户名
 	Status      bool      `json:"status"`      // 请求状态
 }
@@ -33,32 +33,23 @@ type RequestInfo struct {
 // 根据偏移量和限制获取请求信息
 func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
 	var requests []models.Request
-	if err := database.DB.Offset(offset).Limit(limit).Find(&requests).Error; err != nil {
+	if err := database.DB.Offset(offset).Limit(limit).
+		Preload("Student", "user_id = requests.user_id").
+		Preload("Admin", "user_id = requests.undertaker_id").
+		Find(&requests).Error; err != nil {
 		return nil, err
 	}
 
 	var requestInfos []RequestInfo
 	for _, req := range requests {
-		var student models.Student
-		if err := database.DB.Where("user_id = ?", req.UserID).First(&student).Error; err != nil {
-			return nil, err
-		}
-
-		var admin models.Admin
-		if req.UndertakerID != "" {
-			if err := database.DB.Where("user_id = ?", req.UndertakerID).First(&admin).Error; err != nil {
-				return nil, err
-			}
-		}
-
-		username := student.Username
+		username := req.Student.Username
 		if req.IsAnonymous {
 			username = "匿名用户"
 		}
 
 		undertaker := ""
-		if req.UndertakerID != "" {
-			undertaker = admin.Username
+		if req.UndertakerID != "0" {
+			undertaker = req.Admin.Username
 		}
 
 		requestInfo := RequestInfo{

@@ -19,9 +19,9 @@ import (
 type createRequest struct {
 	UserID      string `json:"user_id"`
 	Title       string `json:"title"`
-	Category    int64  `json:"category"`
+	Category    int    `json:"category"`
 	Description string `json:"description"`
-	IsUrgent    int64  `json:"is_urgent"`
+	IsUrgent    int    `json:"is_urgent"`
 	IsAnonymous bool   `json:"is_anonymous"`
 }
 
