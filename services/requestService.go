@@ -4,6 +4,7 @@ import (
 	"Back-end/database"
 	"Back-end/models"
 	"Back-end/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -15,50 +16,108 @@ func CreateRequest(newRequest models.Request) error {
 }
 
 // 获取Request
-type formatRequest struct {
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	Category     int64  `json:"category"`
-	Urgency      int    `json:"urgency"`
-	IsAnonymous  bool   `json:"is_anonymous"`
-	Username     string `json:"username"`
-	IfRubbish    int    `json:"if_rubbish"`
-	UpdatedAt    string `json:"updated_at"`
-	UndertakerID string `json:"undertaker_id"`
-	Status       bool   `json:"status"`
+// 定义一个结构体RequestInfo，用于存储请求信息
+type RequestInfo struct {
+	Username    string    `json:"username"`    // 请求者用户名
+	CreatedAt   time.Time `json:"created_at"`  // 请求创建时间
+	Title       string    `json:"title"`       // 请求标题
+	Description string    `json:"description"` // 请求描述
+	Category    int64     `json:"category"`    // 请求类别
+	Urgency     int64     `json:"urgency"`     // 请求紧急程度
+	IfRubbish   int64     `json:"if_rubbish"`  // 是否为垃圾请求
+	Undertaker  string    `json:"undertaker"`  // 负责人用户名
+	Status      bool      `json:"status"`      // 请求状态
 }
 
-// / 不加用户信息，获取所有的
-func GetAllRequest(offset int, limit int) ([]formatRequest, error) {
-	requests := make([]formatRequest, 0)
-	err := database.DB.Offset(offset).Limit(limit).Find(&requests).Error
-
-	if err != nil {
+// 获取请求信息
+// 根据偏移量和限制获取请求信息
+func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
+	var requests []models.Request
+	if err := database.DB.Offset(offset).Limit(limit).Find(&requests).Error; err != nil {
 		return nil, err
 	}
 
-	//// 处理匿名用户
-	for i := range requests {
-		if requests[i].IsAnonymous {
-			requests[i].Username = "匿名用户"
+	var requestInfos []RequestInfo
+	for _, req := range requests {
+		var student models.Student
+		if err := database.DB.Where("user_id = ?", req.UserID).First(&student).Error; err != nil {
+			return nil, err
 		}
+
+		var admin models.Admin
+		if req.UndertakerID != "" {
+			if err := database.DB.Where("user_id = ?", req.UndertakerID).First(&admin).Error; err != nil {
+				return nil, err
+			}
+		}
+
+		username := student.Username
+		if req.IsAnonymous {
+			username = "匿名用户"
+		}
+
+		undertaker := ""
+		if req.UndertakerID != "" {
+			undertaker = admin.Username
+		}
+
+		requestInfo := RequestInfo{
+			Username:    username,
+			CreatedAt:   req.CreatedAt,
+			Title:       req.Title,
+			Description: req.Description,
+			Category:    req.Category,
+			Urgency:     req.Urgency,
+			IfRubbish:   req.IfRubbish,
+			Undertaker:  undertaker,
+			Status:      req.Status,
+		}
+		requestInfos = append(requestInfos, requestInfo)
 	}
 
-	return requests, nil
+	return requestInfos, nil
 }
 
-// / 加用户信息，获取特定用户的不匿名
-func GetUserRequest(userid string, offset int, limit int) ([]formatRequest, error) {
-	var results []formatRequest
-
-	err := database.DB.Order("-id").Offset(offset).Limit(limit).Where("student_id = ? AND is_anonymous = ?", userid, 0).Find(&results).Error
-
-	if err != nil {
-		utils.LogError(err)
+func GetRequestsByUserID(userID string, offset, limit int) ([]RequestInfo, error) {
+	var requests []models.Request
+	if err := database.DB.Where("user_id = ? AND is_anonymous = ?", userID, false).Offset(offset).Limit(limit).Find(&requests).Error; err != nil {
 		return nil, err
-	} else {
-		return results, nil
 	}
+
+	var requestInfos []RequestInfo
+	for _, req := range requests {
+		var student models.Student
+		if err := database.DB.Where("user_id = ?", userID).First(&student).Error; err != nil {
+			return nil, err
+		}
+
+		var admin models.Admin
+		if req.UndertakerID != "0" {
+			if err := database.DB.Where("user_id = ?", req.UndertakerID).First(&admin).Error; err != nil {
+				return nil, err
+			}
+		}
+
+		undertaker := ""
+		if req.UndertakerID != "0" {
+			undertaker = admin.Username
+		}
+
+		requestInfo := RequestInfo{
+			Username:    student.Username,
+			CreatedAt:   req.CreatedAt,
+			Title:       req.Title,
+			Description: req.Description,
+			Category:    req.Category,
+			Urgency:     req.Urgency,
+			IfRubbish:   req.IfRubbish,
+			Undertaker:  undertaker,
+			Status:      req.Status,
+		}
+		requestInfos = append(requestInfos, requestInfo)
+	}
+
+	return requestInfos, nil
 }
 
 // 管理员处理帖子的时候同步把UnderTakerID加上

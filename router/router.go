@@ -26,7 +26,7 @@ func Init(r *gin.Engine) {
 		apiUser.POST("feedback", controllers.CreateRequest)
 		// 其他受保护的路由可以在这里添加
 	}
-	r.GET("/api/user/feedback", controllers.GetRequest)
+	r.GET("/api/user/feedback", controllers.GetAllRequests)
 
 	const feedback = "/api/feedback"
 	apiReply := r.Group(feedback)
