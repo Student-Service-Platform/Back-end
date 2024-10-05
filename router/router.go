@@ -31,10 +31,10 @@ func Init(r *gin.Engine) {
 	const feedback = "/api/feedback"
 	apiReply := r.Group(feedback)
 	{
-		apiReply.Use(middlewares.TokenAuthMiddleware())
+		apiReply.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath()) //
 		apiReply.POST(":id/reply", controllers.ReplyRequest)
-		apiReply.POST(":id/admin", controllers.HandleRequst)
-		apiReply.PUT(":id/evaluation", controllers.HandleRequst)
-		apiReply.PUT(":id/mark",controllers.MarkRequest)
+		apiReply.PUT(":id/admin", controllers.HandleRequest)
+		apiReply.PUT(":id/evaluation", controllers.Evaluation)
+		apiReply.PUT(":id/mark", controllers.MarkRequest)
 	}
 }

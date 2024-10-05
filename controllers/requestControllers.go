@@ -50,7 +50,7 @@ func CreateRequest(ctx *gin.Context) {
 			UndertakerID: "",
 			IsAnonymous:  request.IsAnonymous,
 			IfRubbish:    1,
-			Status:       false,
+			Status:       true,
 			Grade:        0,
 			GradeContent: "",
 		})
@@ -123,41 +123,37 @@ func GetRequest(ctx *gin.Context) {
 
 // 接单函数
 // 处理请求
-func HandleRequst(ctx *gin.Context) {
+func HandleRequest(ctx *gin.Context) {
 	// 获取当前反馈ID
 	currentFeedbackID := ctx.Param("id")
 	// 获取操作类型
 	action := ctx.Query("action")
+
 	// 将当前反馈ID转换为整数
 	intFeedbackID, err := strconv.Atoi(currentFeedbackID)
 	if err != nil {
-		// 记录错误日志
 		utils.LogError(err)
-		// 返回错误信息
-		utils.JsonResponse(ctx, 200, 200503, "报告数数数据据据型错误", nil)
+		utils.JsonResponse(ctx, 200, 200503, "报告数数据据据型错误", nil)
 		return
 	}
+
 	// 将操作类型转换为整数
-	intaction, err := strconv.Atoi(action)
+	intAction, err := strconv.Atoi(action)
 	if err != nil {
-		// 记录错误日志
 		utils.LogError(err)
-		// 返回错误信息
-		utils.JsonResponse(ctx, 200, 200503, "报告数数数据据据型错误", nil)
+		utils.JsonResponse(ctx, 200, 200503, "报告数数数据据型错误", nil)
 		return
 	}
 
 	// 解析上下文，获取当前用户ID和用户类型
 	currentUserID, userType, _, err := parseContext(ctx)
 	if err != nil {
-		// 记录错误日志
 		utils.LogError(err)
 		return
 	}
 
 	// 判断用户类型是否为2或3
 	if userType != 2 && userType != 3 {
-		// 返回错误信息
 		utils.JsonResponse(ctx, 200, 200401, "头抬起，你的权限不对", nil)
 		return
 	}
@@ -165,22 +161,19 @@ func HandleRequst(ctx *gin.Context) {
 	// 判断当前反馈ID是否已被处理
 	existUserID, err := services.IsHandled(intFeedbackID)
 	if err != nil {
-		// 记录错误日志
 		utils.LogError(err)
-		// 返回错误信息
 		utils.JsonResponse(ctx, 200, 200503, "没关系，我们都有不顺利的时候", nil)
 		return
 	}
 
 	// 判断当前用户是否已处理过该反馈ID
 	if existUserID != "" && existUserID != currentUserID {
-		// 返回错误信息
 		utils.JsonResponse(ctx, 200, 200511, "有人在你之前遇见了！", nil)
 		return
 	}
 
 	// 根据操作类型进行不同的处理
-	switch intaction {
+	switch intAction {
 	case 1:
 		// 处理请求
 		err1 := services.HandleRequest(intFeedbackID, currentUserID)
@@ -194,24 +187,30 @@ func HandleRequst(ctx *gin.Context) {
 			utils.LogError(err1)
 			utils.LogError(err2)
 			utils.JsonResponse(ctx, 200, 200504, "数据库出现在问题，尝试在晚点", nil)
+			return
 		}
+		utils.JsonResponse(ctx, 200, 200200, "处理成功", nil)
 	case 0:
 		// 取消处理请求
 		err1 := services.HandleRequest(intFeedbackID, "")
 		err2 := services.UpdateAdminHaddone(currentUserID, -1)
 		// 如果处理过程中出现错误，返回错误信息
 		if err1 != nil || err2 != nil {
+			utils.LogError(err1)
+			utils.LogError(err2)
 			utils.JsonResponse(ctx, 200, 200504, "数据库出现在问题，尝试在晚点", nil)
+			return
 		}
+		utils.JsonResponse(ctx, 200, 200200, "取消处理成功", nil)
 	default:
-		// 记录错误日志
 		utils.LogError(fmt.Errorf("坏东西来了：未指定的接单操作"))
+		utils.JsonResponse(ctx, 200, 200400, "未指定的接单操作", nil)
 	}
 }
 
 // 评价处理结果（是这个值是写在request里头的，以及要同步更新管理员那里的总分）
 // 处理评分请求
-func GradeHandleRequest(ctx *gin.Context) {
+func Evaluation(ctx *gin.Context) {
 	// 获取请求参数id
 	id := ctx.Param("id")
 	// 将id转换为int类型
@@ -252,14 +251,15 @@ func GradeHandleRequest(ctx *gin.Context) {
 		return
 	}
 
-	// 如果用户类型为1或者请求的执行者id不为空且请求不是垃圾请求且请求的用户id等于当前用户id
-	if userType != 1 && currentRequest.UndertakerID != "" && currentRequest.IfRubbish == 0 && currentRequest.UserID == currentUserID {
+	fmt.Println(userType, currentRequest.UndertakerID, currentRequest.IfRubbish, currentRequest.UserID, currentUserID)
+	// 如果用户类型为1-且---------请求的执行者id---------不为空-且-请求不是垃圾请求-----------------且----当前用户id----------等于请求的用户id
+	if userType == 1 && currentRequest.UndertakerID != "" && currentRequest.IfRubbish != 0 && currentRequest.UserID == currentUserID {
 		// 更新请求的评分和评分内容
 		currentRequest.Grade = input.Grade
 		currentRequest.GradeContent = input.GradeContent
 		// 更新请求的评分
 		if err := services.UpdateRequestEvaluation(&currentRequest); err != nil {
-			utils.JsonResponse(ctx, 200, 200403, "评价失败，请检查身份和请求状态", nil)
+			utils.JsonResponse(ctx, 200, 200403, "评价失败，别灰心，正在让一切重回正轨", nil)
 			return
 		}
 		// 返回成功信息

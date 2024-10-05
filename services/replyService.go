@@ -19,16 +19,10 @@ func CheckRequestReplyExistByID(id int64) error {
 	return result.Error
 }
 
-var NewReply models.Reply
-
-func CreateRequestReply(content string, currentUserID string, request_id int64) error {
-	NewReply = models.Reply{
-		RequestID:  request_id,
-		Father:     0,
-		Content:    content,
-		Respondent: currentUserID,
+func CreateReply(reply *models.Reply) error {
+	result := database.DB.Create(reply)
+	if result.Error != nil {
+		utils.LogError(result.Error)
 	}
-
-	result := database.DB.Table("replies").Create(&NewReply)
 	return result.Error
 }
