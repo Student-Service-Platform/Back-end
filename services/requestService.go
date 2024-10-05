@@ -29,29 +29,41 @@ type RequestInfo struct {
 	Status      bool      `json:"status"`      // 请求状态
 }
 
-// 获取请求信息
-// 根据偏移量和限制获取请求信息
+// GetAllRequests retrieves all requests from the database, with an optional offset and limit.
 func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
+	// Define a variable to store the requests
 	var requests []models.Request
+	// Retrieve requests from the database with an offset and limit
 	if err := database.DB.Offset(offset).Limit(limit).
+		// Preload the student information
 		Preload("Student", "user_id = ?", "user_id").
+		// Preload the admin information
 		Preload("Admin", "user_id = ?", "undertaker_id").
+		// Find the requests
 		Find(&requests).Error; err != nil {
+		// Return an error if the request fails
 		return nil, err
 	}
 
+	// Define a variable to store the request information
 	var requestInfos []RequestInfo
+	// Iterate through the requests
 	for _, req := range requests {
+		// Set the username to the student's username
 		username := req.Student.Username
+		// If the request is anonymous, set the username to "匿名用户"
 		if req.IsAnonymous {
 			username = "匿名用户"
 		}
 
+		// Set the undertaker to an empty string
 		undertaker := ""
+		// If the undertaker ID is not "null", set the undertaker to the admin's username
 		if "null" != req.UndertakerID {
 			undertaker = req.Admin.Username
 		}
 
+		// Create a new request information object
 		requestInfo := RequestInfo{
 			Username:    username,
 			CreatedAt:   req.CreatedAt,
@@ -63,39 +75,44 @@ func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
 			Undertaker:  undertaker,
 			Status:      req.Status,
 		}
+		// Append the request information to the request information array
 		requestInfos = append(requestInfos, requestInfo)
 	}
 
+	// Return the request information array
 	return requestInfos, nil
 }
 
-func GetRequestsByUserID(userID string, offset, limit int) ([]RequestInfo, error) {
+func GetRequestsByUserID(targetUserID string, offset, limit int) ([]RequestInfo, error) {
 	var requests []models.Request
-	if err := database.DB.Where("user_id = ? AND is_anonymous = ?", userID, false).Offset(offset).Limit(limit).Find(&requests).Error; err != nil {
+	if err := database.DB.Where("user_id = ? AND is_anonymous = ?", targetUserID, false).Offset(offset).Limit(limit).Find(&requests).Error; err != nil {
+		utils.LogError(err)
+		return nil, err
+	}
+
+	var targetUser models.Student
+	if err := database.DB.Where("user_id = ?", targetUserID).First(&targetUser).Error; err != nil {
+		utils.LogError(err)
 		return nil, err
 	}
 
 	var requestInfos []RequestInfo
 	for _, req := range requests {
-		var student models.Student
-		if err := database.DB.Where("user_id = ?", userID).First(&student).Error; err != nil {
-			return nil, err
-		}
 
 		var admin models.Admin
-		if req.UndertakerID != "0" {
+		if req.UndertakerID != "null" {
 			if err := database.DB.Where("user_id = ?", req.UndertakerID).First(&admin).Error; err != nil {
 				return nil, err
 			}
 		}
 
 		undertaker := ""
-		if req.UndertakerID != "0" {
+		if req.UndertakerID != "null" {
 			undertaker = admin.Username
 		}
 
 		requestInfo := RequestInfo{
-			Username:    student.Username,
+			Username:    targetUser.Username,
 			CreatedAt:   req.CreatedAt,
 			Title:       req.Title,
 			Description: req.Description,

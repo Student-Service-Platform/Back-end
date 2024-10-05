@@ -105,9 +105,9 @@ func GetAllRequests(ctx *gin.Context) {
 				utils.JsonResponse(ctx, 200, 200200, "success", requests)
 			}
 		}
-	} /* else {
+	} else {
 		//看特定用户的Request，不包括匿名的
-		requests, err := services.GetRequests(offset, perPage)
+		requests, err := services.GetRequestsByUserID(UserID, offset, perPage)
 		if err != nil {
 			utils.LogError(err)
 			utils.JsonResponse(ctx, 200, 200504, "服务器出错，我们都有不顺利的时候，尝试在晚点", nil)
@@ -118,7 +118,7 @@ func GetAllRequests(ctx *gin.Context) {
 				utils.JsonResponse(ctx, 200, 200200, "success", requests)
 			}
 		}
-	}*/
+	}
 }
 
 // 接单函数
