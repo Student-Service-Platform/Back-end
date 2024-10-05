@@ -47,7 +47,7 @@ func CreateRequest(ctx *gin.Context) {
 			Description:  request.Description,
 			Category:     request.Category,
 			Urgency:      request.IsUrgent,
-			UndertakerID: "",
+			UndertakerID: "null",
 			IsAnonymous:  request.IsAnonymous,
 			IfRubbish:    1,
 			Status:       true,
@@ -252,8 +252,8 @@ func Evaluation(ctx *gin.Context) {
 	}
 
 	fmt.Println(userType, currentRequest.UndertakerID, currentRequest.IfRubbish, currentRequest.UserID, currentUserID)
-	// 如果用户类型为1-且---------请求的执行者id---------不为空-且-请求不是垃圾请求-----------------且----当前用户id----------等于请求的用户id
-	if userType == 1 && currentRequest.UndertakerID != "" && currentRequest.IfRubbish != 0 && currentRequest.UserID == currentUserID {
+	// 如果用户类型为1-且---------请求的执行者id---------不为null-且-请求不是垃圾请求-----------------且----当前用户id----------等于请求的用户id
+	if userType == 1 && currentRequest.UndertakerID != "null" && currentRequest.IfRubbish != 0 && currentRequest.UserID == currentUserID {
 		// 更新请求的评分和评分内容
 		currentRequest.Grade = input.Grade
 		currentRequest.GradeContent = input.GradeContent

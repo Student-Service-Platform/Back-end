@@ -34,8 +34,8 @@ type RequestInfo struct {
 func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
 	var requests []models.Request
 	if err := database.DB.Offset(offset).Limit(limit).
-		Preload("Student", "user_id = requests.user_id").
-		Preload("Admin", "user_id = requests.undertaker_id").
+		Preload("Student", "user_id = ?", "user_id").
+		Preload("Admin", "user_id = ?", "undertaker_id").
 		Find(&requests).Error; err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
 		}
 
 		undertaker := ""
-		if req.UndertakerID != "0" {
+		if "null" != req.UndertakerID {
 			undertaker = req.Admin.Username
 		}
 
