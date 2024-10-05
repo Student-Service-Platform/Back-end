@@ -121,53 +121,211 @@ func GetRequest(ctx *gin.Context) {
 	}
 }
 
-// 接单函数（好没有存在感的样子）
+// 接单函数
+// 处理请求
 func HandleRequst(ctx *gin.Context) {
+	// 获取当前反馈ID
 	currentFeedbackID := ctx.Param("id")
+	// 获取操作类型
 	action := ctx.Query("action")
+	// 将当前反馈ID转换为整数
 	intFeedbackID, err := strconv.Atoi(currentFeedbackID)
 	if err != nil {
+		// 记录错误日志
 		utils.LogError(err)
+		// 返回错误信息
 		utils.JsonResponse(ctx, 200, 200503, "报告数数数据据据型错误", nil)
 		return
 	}
+	// 将操作类型转换为整数
 	intaction, err := strconv.Atoi(action)
 	if err != nil {
+		// 记录错误日志
 		utils.LogError(err)
+		// 返回错误信息
 		utils.JsonResponse(ctx, 200, 200503, "报告数数数据据据型错误", nil)
 		return
 	}
 
+	// 解析上下文，获取当前用户ID和用户类型
 	currentUserID, userType, _, err := parseContext(ctx)
 	if err != nil {
+		// 记录错误日志
 		utils.LogError(err)
 		return
 	}
 
-	switch userType {
-	case 2, 3: //确定由管理员权限后……
-		//先看接了没有，如果没有或者是自己改的，那就可以改
-		existUserID, err := services.IsHandled(int64(intFeedbackID))
-		if nil != err {
-			utils.LogError(err)
-			utils.JsonResponse(ctx, 200, 200503, "没关系，我们都有不顺利的时候", nil)
-		} else if existUserID != currentUserID {
-			utils.JsonResponse(ctx, 200, 200511, "有人在你之前遇见了！", nil)
-		} else {
-			if 1 == intaction {
-				err = services.HandleRequest(int64(intFeedbackID), currentUserID)
-			} else if 0 == intaction {
-				err = services.HandleRequest(int64(intFeedbackID), "")
-			} else {
-				utils.LogError(fmt.Errorf("坏东西来了：未指定的接单操作"))
-			}
-		}
-		break
-	default:
+	// 判断用户类型是否为2或3
+	if userType != 2 && userType != 3 {
+		// 返回错误信息
 		utils.JsonResponse(ctx, 200, 200401, "头抬起，你的权限不对", nil)
-		break
+		return
 	}
 
+	// 判断当前反馈ID是否已被处理
+	existUserID, err := services.IsHandled(intFeedbackID)
+	if err != nil {
+		// 记录错误日志
+		utils.LogError(err)
+		// 返回错误信息
+		utils.JsonResponse(ctx, 200, 200503, "没关系，我们都有不顺利的时候", nil)
+		return
+	}
+
+	// 判断当前用户是否已处理过该反馈ID
+	if existUserID != "" && existUserID != currentUserID {
+		// 返回错误信息
+		utils.JsonResponse(ctx, 200, 200511, "有人在你之前遇见了！", nil)
+		return
+	}
+
+	// 根据操作类型进行不同的处理
+	switch intaction {
+	case 1:
+		// 处理请求
+		err1 := services.HandleRequest(intFeedbackID, currentUserID)
+		var err2 error
+		// 如果当前反馈ID未被处理过，更新管理员已处理数量
+		if existUserID == "" {
+			err2 = services.UpdateAdminHaddone(currentUserID, 1)
+		}
+		// 如果处理过程中出现错误，记录错误日志并返回错误信息
+		if err1 != nil || err2 != nil {
+			utils.LogError(err1)
+			utils.LogError(err2)
+			utils.JsonResponse(ctx, 200, 200504, "数据库出现在问题，尝试在晚点", nil)
+		}
+	case 0:
+		// 取消处理请求
+		err1 := services.HandleRequest(intFeedbackID, "")
+		err2 := services.UpdateAdminHaddone(currentUserID, -1)
+		// 如果处理过程中出现错误，返回错误信息
+		if err1 != nil || err2 != nil {
+			utils.JsonResponse(ctx, 200, 200504, "数据库出现在问题，尝试在晚点", nil)
+		}
+	default:
+		// 记录错误日志
+		utils.LogError(fmt.Errorf("坏东西来了：未指定的接单操作"))
+	}
 }
 
 // 评价处理结果（是这个值是写在request里头的，以及要同步更新管理员那里的总分）
+// 处理评分请求
+func GradeHandleRequest(ctx *gin.Context) {
+	// 获取请求参数id
+	id := ctx.Param("id")
+	// 将id转换为int类型
+	intID, err := strconv.Atoi(id)
+	// 如果转换失败，记录错误并返回
+	if err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200503, "报告反馈数数据据据型错误", nil)
+		return
+	}
+
+	// 定义输入结构体
+	var input struct {
+		Grade        int    `json:"grade"`
+		GradeContent string `json:"grade_content"`
+	}
+	// 绑定json数据到输入结构体
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200503, "数据错误在传入", nil)
+		return
+	}
+
+	// 根据id获取请求
+	currentRequest, err := services.GetRequestByID(intID)
+	// 如果获取失败，记录错误并返回
+	if err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200512, "很久很久以前，大概有这么一个反馈", nil)
+		return
+	}
+
+	// 解析上下文，获取当前用户id和用户类型
+	currentUserID, userType, _, err := parseContext(ctx)
+	// 如果解析失败，记录错误并返回
+	if err != nil {
+		utils.LogError(err)
+		return
+	}
+
+	// 如果用户类型为1或者请求的执行者id不为空且请求不是垃圾请求且请求的用户id等于当前用户id
+	if userType != 1 && currentRequest.UndertakerID != "" && currentRequest.IfRubbish == 0 && currentRequest.UserID == currentUserID {
+		// 更新请求的评分和评分内容
+		currentRequest.Grade = input.Grade
+		currentRequest.GradeContent = input.GradeContent
+		// 更新请求的评分
+		if err := services.UpdateRequestEvaluation(&currentRequest); err != nil {
+			utils.JsonResponse(ctx, 200, 200403, "评价失败，请检查身份和请求状态", nil)
+			return
+		}
+		// 返回成功信息
+		utils.JsonResponse(ctx, 200, 200200, "评价成功", nil)
+	} else {
+		// 返回失败信息
+		utils.JsonResponse(ctx, 200, 200403, "评价失败，请检查身份或请求状态", nil)
+		return
+	}
+
+	// 更新执行者的评分
+	if err := services.UpdateAdminEvaluation(currentRequest.UndertakerID, input.Grade); err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200513, "数据库出现在问题", nil)
+		return
+	}
+}
+
+// 将request标记为垃圾
+func MarkRequest(ctx *gin.Context) {
+	// 获取请求参数id
+	id := ctx.Param("id")
+	// 将id转换为int类型
+	intID, err := strconv.Atoi(id)
+	// 如果转换失败，记录错误并返回
+	if err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200503, "数据错误在传入", nil)
+	}
+	// 解析上下文，获取当前用户id和用户类型
+	_, userType, _, err := parseContext(ctx)
+	// 如果解析失败，记录错误并返回
+	if err != nil {
+		utils.LogError(err)
+		return
+	}
+	switch userType {
+	case 2: //普通管理员内
+		// 标记请求为垃圾
+		err = services.MarkRequest(intID)
+		if err != nil {
+			utils.LogError(err)
+			utils.JsonResponse(ctx, 200, 200513, "坐和放宽，数据库出现了一些问题", nil)
+		} else {
+			utils.JsonResponse(ctx, 200, 200200, "标记成功", nil)
+		}
+		break
+	case 3: //超级管理员
+		confirm := ctx.Query("confirmation")
+		if "true" == confirm { //超管确认垃圾
+			err = services.MarkRequest(intID)
+			if err != nil {
+				utils.LogError(err)
+				utils.JsonResponse(ctx, 200, 200513, "坐和放宽，数据库又整了点错误出来", nil)
+			}
+			return
+		} else if "false" == confirm {
+			err = services.StatueRequest(intID)
+			if err != nil {
+				utils.LogError(err)
+				utils.JsonResponse(ctx, 200, 200513, "坐和放宽，数据库又整了点错误出来", nil)
+			}
+			return
+		}
+		break
+	default:
+		utils.JsonResponse(ctx, 200, 200403, "权限不足", nil)
+	}
+}

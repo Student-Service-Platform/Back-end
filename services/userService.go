@@ -2,8 +2,11 @@ package services
 
 import (
 	"Back-end/database"
+	"Back-end/models"
 	"Back-end/utils"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 type ReturnUserInfo struct {
@@ -32,5 +35,18 @@ func UpdateProfile(userID, table, object, value string) error {
 	}
 
 	result := database.DB.Table(table).Where("user_id = ?", userID).UpdateColumn(object, value)
+	return result.Error
+}
+
+// 管理员的评分和已经接单的数量更新
+func UpdateAdminHaddone(UndertakerID string, add int) error {
+	var targetAdmin models.Admin
+	result := database.DB.Model(&targetAdmin).Where("id = ?", UndertakerID).Update("had_done", gorm.Expr("had_done + ?", add))
+	return result.Error
+}
+
+func UpdateAdminEvaluation(UndertakerID string, Grade int) error {
+	var targetAdmin models.Admin
+	result := database.DB.Model(&targetAdmin).Where("id = ?", UndertakerID).Update("evalutaion", gorm.Expr("evalutaion + ?", Grade))
 	return result.Error
 }

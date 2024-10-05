@@ -34,5 +34,7 @@ func Init(r *gin.Engine) {
 		apiReply.Use(middlewares.TokenAuthMiddleware())
 		apiReply.POST(":id/reply", controllers.ReplyRequest)
 		apiReply.POST(":id/admin", controllers.HandleRequst)
+		apiReply.PUT(":id/evaluation", controllers.HandleRequst)
+		apiReply.PUT(":id/mark",controllers.MarkRequest)
 	}
 }
