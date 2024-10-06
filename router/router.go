@@ -46,8 +46,8 @@ func Init(r *gin.Engine) {
 	{
 		// apiSuperAdmin.POST("")
 		apiSuperAdmin.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath()) //
-		apiSuperAdmin.POST("appadmin", controllers.Admin_Register)
-		apiSuperAdmin.DELETE("deluser", controllers.Del)
+		apiSuperAdmin.POST("workbench", controllers.Admin_Register)
+		apiSuperAdmin.DELETE("workbench", controllers.Del)
 		apiSuperAdmin.GET("workbench", controllers.GetRubbish)
 		apiSuperAdmin.PUT("workbench", controllers.UpdateRubbish)
 		// apiSuperAdmin.PUT(":id/admin", controllers.HandleRequest)

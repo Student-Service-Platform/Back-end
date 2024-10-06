@@ -80,8 +80,10 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		switch userType {
 		case 1:
 			table = "students"
+			break
 		case 2, 3:
 			table = "admins"
+			break
 		default:
 			c.JSON(http.StatusUnauthorized, gin.H{"code": 200401, "data": nil, "msg": "登录信息（用户类型）无效"})
 			c.Abort()

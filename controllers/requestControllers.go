@@ -67,10 +67,13 @@ func CreateRequest(ctx *gin.Context) {
 		} else {
 			utils.JsonResponse(ctx, 200, 200200, "创建成功", nil)
 		}
+		break
 	case 2, 3: // 管理员账户
 		utils.JsonResponse(ctx, 200, 200401, "客户端报告您可能不是普通人，换个账户试试", nil)
+		break
 	default:
 		utils.JsonResponse(ctx, 200, 200506, "你可能没有合适的权限，坐和放宽。", nil)
+		break
 	}
 }
 
@@ -265,6 +268,7 @@ func HandleRequest(ctx *gin.Context) {
 			return
 		}
 		utils.JsonResponse(ctx, 200, 200200, "处理成功", nil)
+		break
 	case 0:
 		// 取消处理请求
 		err1 := services.HandleRequest(intFeedbackID, "null")
@@ -277,9 +281,11 @@ func HandleRequest(ctx *gin.Context) {
 			return
 		}
 		utils.JsonResponse(ctx, 200, 200200, "取消处理成功", nil)
+		break
 	default:
 		utils.LogError(fmt.Errorf("坏东西来了：未指定的接单操作"))
 		utils.JsonResponse(ctx, 200, 200400, "未指定的接单操作", nil)
+		break
 	}
 }
 
@@ -393,7 +399,7 @@ func MarkRequest(ctx *gin.Context) {
 			}
 			return
 		} else if "false" == confirm {
-			err = services.StatueRequest(intID)
+			err = services.RemakeRequest(intID)
 			if err != nil {
 				utils.LogError(err)
 				utils.JsonResponse(ctx, 200, 200513, "坐和放宽，数据库又整了点错误出来", nil)

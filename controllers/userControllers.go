@@ -19,8 +19,10 @@ func parseContext(ctx *gin.Context) (string, int, string, error) {
 	switch userType {
 	case 1:
 		table = "students"
+		break
 	case 2, 3:
 		table = "admins"
+		break
 	default:
 		utils.JsonResponse(ctx, 200, 401, "需要滚回到以前的用户类型", nil)
 		return "", 0, "", fmt.Errorf("用户类型无效")
@@ -94,6 +96,7 @@ func UpdateProfile(ctx *gin.Context) {
 		} else {
 			utils.JsonResponse(ctx, 200, 200200, "修改成功！大概得刷新页面生效吧。", nil)
 		}
+		break
 	default:
 		utils.JsonResponse(ctx, 200, 200508, "让我们重回正轨！请选择有效的修改字段。", nil)
 	}
