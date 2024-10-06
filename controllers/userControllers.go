@@ -39,8 +39,9 @@ func GetProfile(ctx *gin.Context) {
 		return
 	}
 
-	if targetUserID == "" {
-		targetUserID = currentUserID
+	if targetUserID != currentUserID {
+		utils.JsonResponse(ctx, 200, 200506, "你可能没有合适的权限，坐和放宽。", nil)
+		return
 	}
 
 	fmt.Print(targetUserID)
