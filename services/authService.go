@@ -25,7 +25,7 @@ func CheckUserExistByUserID(UserID string, table string) error {
 // 添加学生用户
 var NewStudent models.Student
 
-func AddStudent(UserID string, Username string, RawPassword string) error {
+func AddStudent(UserID, Username, RawPassword, Number, Mail string) error {
 	// 密码加密
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(RawPassword), bcrypt.DefaultCost)
 	if err != nil {
@@ -37,8 +37,8 @@ func AddStudent(UserID string, Username string, RawPassword string) error {
 		UserID:   UserID,
 		Username: Username,
 		Password: string(hashedPassword),
-		Phone:    "",
-		Mail:     "",
+		Phone:    Number,
+		Mail:     Mail,
 		IfDel:    false,
 		Avatar:   "https://imgse.com/i/pA89yOe",
 		Type:     1,

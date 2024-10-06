@@ -18,6 +18,7 @@ type registerData struct {
 	Password string `json:"password" binding:"required"`
 	MailAuth bool   `json:"mail_auth"` //还没弄完
 	Phone    string `json:"phone"`
+	Mail     string `json:"mail" binding:"required"`
 }
 
 func Register(ctx *gin.Context) {
@@ -49,12 +50,16 @@ func Register(ctx *gin.Context) {
 				utils.JsonResponse(ctx, 200, 200504, "你这学号已经被注册了", nil)
 			} else {
 				//补齐struct然后塞进去，这里只负责传入相关信息
-				err = services.AddStudent(data.UserID, data.Username, data.Password)
-				if err != nil {
-					utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", nil)
-					utils.LogError(err)
+				if data.Mail == "" {
+					utils.JsonResponse(ctx, 200, 200503, "你这邮箱有问题啊", nil)
 				} else {
-					utils.JsonResponse(ctx, 200, 200200, "注册成功", nil)
+					err = services.AddStudent(data.UserID, data.Username, data.Password, data.Phone, data.Mail)
+					if err != nil {
+						utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", nil)
+						utils.LogError(err)
+					} else {
+						utils.JsonResponse(ctx, 200, 200200, "注册成功", nil)
+					}
 				}
 			}
 		}

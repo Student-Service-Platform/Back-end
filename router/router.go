@@ -40,4 +40,18 @@ func Init(r *gin.Engine) {
 		apiFeedback.PUT(":id/evaluation", controllers.Evaluation)
 		apiFeedback.PUT(":id/mark", controllers.MarkRequest)
 	}
+
+	const superadmin = "/api/superadmin"
+	apiSuperAdmin := r.Group(superadmin)
+	{
+		// apiSuperAdmin.POST("")
+		apiSuperAdmin.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath()) //
+		apiSuperAdmin.POST("appadmin", controllers.Admin_Register)
+		apiSuperAdmin.DELETE("deluser", controllers.Del)
+		apiSuperAdmin.GET("workbench", controllers.GetRubbish)
+		apiSuperAdmin.PUT("workbench", controllers.UpdateRubbish)
+		// apiSuperAdmin.PUT(":id/admin", controllers.HandleRequest)
+		// apiSuperAdmin.PUT(":id/evaluation", controllers.Evaluation)
+		// apiSuperAdmin.PUT(":id/mark", controllers.MarkRequest)
+	}
 }

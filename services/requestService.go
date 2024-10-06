@@ -145,6 +145,57 @@ func GetRequestsByUserID(targetUserID string, offset, limit int) ([]RequestInfo,
 	return requestInfos, nil
 }
 
+// GetAllRubbish 获取所有垃圾请求
+func GetAllRubbish(offset, limit int) ([]RequestInfo, error) {
+	// 定义一个Request类型的切片
+	var requests []models.Request
+	// 查询数据库，设置偏移量和限制数量，预加载Student和Admin两个关联表，以user_id和undertaker_id作为条件
+	if err := database.DB.Offset(offset).Limit(limit).
+		Preload("Student", "user_id = ?", "user_id").
+		Preload("Admin", "user_id = ?", "undertaker_id").
+		Find(&requests).Error; err != nil {
+		return nil, err
+	}
+
+	// 定义一个RequestInfo类型的切片
+	var requestInfos []RequestInfo
+	// 遍历requests切片，将每一个请求转换为RequestInfo类型，并添加到requestInfos切片中
+	for _, req := range requests {
+		// 获取请求的创建者用户名
+		username := req.Student.Username
+		// 如果请求是匿名的，则用户名为匿名用户
+		if req.IsAnonymous {
+			username = "匿名用户"
+		}
+
+		// 获取请求的执行者用户名
+		undertaker := ""
+
+		// 如果请求的执行者ID不为空，则获取执行者的用户名
+		if "null" != req.UndertakerID {
+			undertaker = req.Admin.Username
+		}
+		// 如果请求是垃圾请求，则将请求转换为RequestInfo类型，并添加到requestInfos切片中
+		if req.IfRubbish == 1 {
+			requestInfo := RequestInfo{
+				Username:    username,
+				CreatedAt:   req.CreatedAt,
+				Title:       req.Title,
+				Description: req.Description,
+				Category:    req.Category,
+				Urgency:     req.Urgency,
+				IfRubbish:   req.IfRubbish,
+				Undertaker:  undertaker,
+				Status:      req.Status,
+			}
+			requestInfos = append(requestInfos, requestInfo)
+		}
+	}
+
+	// 返回requestInfos切片和nil错误
+	return requestInfos, nil
+}
+
 type SelectedRequest struct {
 	Title        string    `json:"title"`         // 请求标题
 	Username     string    `json:"username"`      // 请求者用户名
@@ -338,7 +389,7 @@ func RemakeRequest(postID int) error {
 }
 
 // Statue Request
-func StatueRequest(postID int) error {
+func RubbishRequest(postID int) error {
 	var RubbishRequest models.Request
 	result := database.DB.Model(&RubbishRequest).Where("id = ?", postID).UpdateColumn("if_rubbish", 0) //is_rubbish为0之后就是真的rubbish了
 	return result.Error
