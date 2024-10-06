@@ -6,6 +6,7 @@ import (
 	"Back-end/utils"
 	"fmt"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -49,4 +50,43 @@ func UpdateAdminEvaluation(UndertakerID string, Grade int) error {
 	var targetAdmin models.Admin
 	result := database.DB.Model(&targetAdmin).Where("id = ?", UndertakerID).Update("evalutaion", gorm.Expr("evalutaion + ?", Grade))
 	return result.Error
+}
+
+// 初始化的函数
+func InitUserAccount() {
+	err := CheckUserExistByUserID("null", "admins")
+	if err != nil && err != gorm.ErrRecordNotFound { //如果发生了错误
+		utils.LogError(err)
+		fmt.Println("警告！初始化管理员账户可能不成功")
+	} else if err == nil { //如果找到了
+		return
+	} else {
+		randomString, err := utils.GenerateRandomString(16)
+		if err != nil {
+			utils.LogError(err)
+			fmt.Println("初始化管理员密码失败:", err)
+			return
+		}
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(randomString), bcrypt.DefaultCost)
+		if err != nil {
+			utils.LogError(err)
+			fmt.Println("出现了点奇怪的错误：", err)
+			return
+		}
+		result := database.DB.Create(&models.Admin{
+			UserID:   "null",
+			Username: "null",
+			Password: string(hashedPassword),
+			Mail:     "null",
+			Phone:    "null",
+			Avatar:   "null",
+			Type:     3,
+		})
+		if result.Error != nil {
+			utils.LogError(result.Error)
+			fmt.Println("初始化管理员账户失败:", result.Error)
+		}
+		fmt.Println("请找个小本本记下来默认超级管理员的随机密码:", randomString)
+
+	}
 }

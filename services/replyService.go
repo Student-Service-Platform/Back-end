@@ -4,7 +4,6 @@ import (
 	"Back-end/database"
 	"Back-end/models"
 	"Back-end/utils"
-	"time"
 )
 
 // 回复反馈（没有加严格的权限限制，还是要准备为学生回复预留一点的
@@ -22,10 +21,10 @@ func CreateReply(reply *models.Reply) error {
 
 // 获取特定反馈的回复
 type TinyReply struct {
-	ID         int       `json:"id"`
-	Content    string    `json:"content"`
-	Respondent string    `json:"respondent"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID         int    `json:"id"`
+	Content    string `json:"content"`
+	Respondent string `json:"respondent"`
+	CreatedAt  string `json:"created_at"`
 }
 
 func GetRepliesByRequestID(request_id int) ([]TinyReply, error) {
@@ -70,7 +69,7 @@ func GetRepliesByRequestID(request_id int) ([]TinyReply, error) {
 			ID:         int(reply.ID),
 			Content:    reply.Content,
 			Respondent: username,
-			CreatedAt:  reply.CreatedAt,
+			CreatedAt:  reply.CreatedAt.Format("2006-01-02 15:04"),
 		})
 	}
 

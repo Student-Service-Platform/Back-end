@@ -2,6 +2,8 @@ package utils
 
 import (
 	"Back-end/config"
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,4 +24,12 @@ func GenerateJWT(userID string, userType int) string {
 	}
 	LogError(err)
 	return tokenString
+}
+
+func GenerateRandomString(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes)[:length], nil
 }

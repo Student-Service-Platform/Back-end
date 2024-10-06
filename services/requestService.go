@@ -4,7 +4,6 @@ import (
 	"Back-end/database"
 	"Back-end/models"
 	"Back-end/utils"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -18,16 +17,16 @@ func CreateRequest(newRequest models.Request) error {
 // 获取Request
 // 定义一个结构体RequestInfo，用于存储请求信息
 type RequestInfo struct {
-	Id          uint      `json:"id"`          // 帖子id
-	Username    string    `json:"username"`    // 请求者用户名
-	CreatedAt   time.Time `json:"created_at"`  // 请求创建时间
-	Title       string    `json:"title"`       // 请求标题
-	Description string    `json:"description"` // 请求描述
-	Category    int       `json:"category"`    // 请求类别
-	Urgency     int       `json:"urgency"`     // 请求紧急程度
-	IfRubbish   int       `json:"if_rubbish"`  // 是否为垃圾请求
-	Undertaker  string    `json:"undertaker"`  // 负责人用户名
-	Status      bool      `json:"status"`      // 请求状态
+	Id          uint   `json:"id"`          // 帖子id
+	Username    string `json:"username"`    // 请求者用户名
+	CreatedAt   string `json:"created_at"`  // 请求创建时间
+	Title       string `json:"title"`       // 请求标题
+	Description string `json:"description"` // 请求描述
+	Category    int    `json:"category"`    // 请求类别
+	Urgency     int    `json:"urgency"`     // 请求紧急程度
+	IfRubbish   int    `json:"if_rubbish"`  // 是否为垃圾请求
+	Undertaker  string `json:"undertaker"`  // 负责人用户名
+	Status      bool   `json:"status"`      // 请求状态
 }
 
 // GetAllRequests 获取所有请求，不需要登录
@@ -66,7 +65,7 @@ func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
 		requestInfo := RequestInfo{
 			Id:          req.ID,
 			Username:    username,
-			CreatedAt:   req.CreatedAt,
+			CreatedAt:   req.CreatedAt.Format("2006-01-02 15:04"),
 			Title:       req.Title,
 			Description: req.Description,
 			Category:    req.Category,
@@ -128,7 +127,7 @@ func GetRequestsByUserID(targetUserID string, offset, limit int) ([]RequestInfo,
 		// 创建一个 RequestInfo 变量，用于存储请求信息
 		requestInfo := RequestInfo{
 			Username:    targetUser.Username,
-			CreatedAt:   req.CreatedAt,
+			CreatedAt:   req.CreatedAt.Format("2006-01-02 15:04"),
 			Title:       req.Title,
 			Description: req.Description,
 			Category:    req.Category,
@@ -179,7 +178,7 @@ func GetAllRubbish(offset, limit int) ([]RequestInfo, error) {
 		if req.IfRubbish == 1 {
 			requestInfo := RequestInfo{
 				Username:    username,
-				CreatedAt:   req.CreatedAt,
+				CreatedAt:   req.CreatedAt.Format("2006-01-02 15:04"),
 				Title:       req.Title,
 				Description: req.Description,
 				Category:    req.Category,
@@ -197,16 +196,16 @@ func GetAllRubbish(offset, limit int) ([]RequestInfo, error) {
 }
 
 type SelectedRequest struct {
-	Id           uint      `json:"id"`            // id
-	Title        string    `json:"title"`         // 请求标题
-	Username     string    `json:"username"`      // 请求者用户名
-	CreatedAt    time.Time `json:"created_at"`    // 请求创建时间
-	Description  string    `json:"description"`   // 请求描述
-	Category     int       `json:"category"`      // 请求类别
-	Urgency      int       `json:"urgency"`       // 请求紧急程度
-	Respond      string    `json:"respond"`       // 响应
-	Grade        int       `json:"grade"`         // 评分
-	GradeContent string    `json:"grade_content"` // 评分内容
+	Id           uint   `json:"id"`            // id
+	Title        string `json:"title"`         // 请求标题
+	Username     string `json:"username"`      // 请求者用户名
+	CreatedAt    string `json:"created_at"`    // 请求创建时间
+	Description  string `json:"description"`   // 请求描述
+	Category     int    `json:"category"`      // 请求类别
+	Urgency      int    `json:"urgency"`       // 请求紧急程度
+	Respond      string `json:"respond"`       // 响应
+	Grade        int    `json:"grade"`         // 评分
+	GradeContent string `json:"grade_content"` // 评分内容
 }
 
 // 获取没有处理的请求
@@ -250,7 +249,7 @@ func GetSelectRequests(offset, limit, irb, status int) ([]SelectedRequest, error
 		requestInfo := SelectedRequest{
 			Username:     username,
 			Id:           req.ID,
-			CreatedAt:    req.CreatedAt,
+			CreatedAt:    req.CreatedAt.Format("2006-01-02 15:04"),
 			Title:        req.Title,
 			Description:  req.Description,
 			Category:     req.Category,
@@ -313,15 +312,15 @@ func GetRequestByID(requestID int) (models.Request, error) {
 }
 
 type SmallRequest struct {
-	Username     string    `json:"username"`
-	CreatedAt    time.Time `json:"created_at"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	Category     int       `json:"category"`
-	Urgency      int       `json:"urgency"`
-	Grade        int       `json:"grade"`
-	GradeContent string    `json:"grade_content"`
-	Undertaker   string    `json:"undertaker"`
+	Username     string `json:"username"`
+	CreatedAt    string `json:"created_at"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	Category     int    `json:"category"`
+	Urgency      int    `json:"urgency"`
+	Grade        int    `json:"grade"`
+	GradeContent string `json:"grade_content"`
+	Undertaker   string `json:"undertaker"`
 }
 
 func GetSmallRequestByID(requestID int) (SmallRequest, error) {
@@ -357,7 +356,7 @@ func GetSmallRequestByID(requestID int) (SmallRequest, error) {
 
 	smrequest := SmallRequest{
 		Username:     StdName,
-		CreatedAt:    request.CreatedAt,
+		CreatedAt:    request.CreatedAt.Format("2006-01-02 15:04"),
 		Title:        request.Title,
 		Description:  request.Description,
 		Category:     request.Category,

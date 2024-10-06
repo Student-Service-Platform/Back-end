@@ -3,6 +3,7 @@ package main
 import (
 	"Back-end/database"
 	"Back-end/router"
+	"Back-end/services"
 	"Back-end/utils"
 
 	"github.com/rs/zerolog/log"
@@ -20,4 +21,6 @@ func main() {
 		utils.LogError(err)
 		log.Fatal().Err(err).Msg("Failed to start server")
 	}
+
+	services.InitUserAccount()
 }
