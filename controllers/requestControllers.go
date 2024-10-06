@@ -397,3 +397,31 @@ func MarkRequest(ctx *gin.Context) {
 		utils.JsonResponse(ctx, 200, 200403, "权限不足", nil)
 	}
 }
+
+// 获取指定ID的Request详情
+func GetSpecificRequest(ctx *gin.Context) {
+	id := ctx.Param("id")
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200516, "错误在反馈ID……", nil)
+		return
+	}
+
+	request, err1 := services.GetRequestByID(intID)
+	replies, err2 := services.GetRepliesByRequestID(intID)
+	if err1 != nil && err2 != nil {
+		utils.JsonResponse(ctx, 200, 200200, "success", gin.H{
+			"request": request,
+			"replies": replies,
+		})
+		return
+	} else {
+		utils.LogError(err1)
+		utils.LogError(err2)
+		utils.JsonResponse(ctx, 200, 200517, "好像有点问题", gin.H{
+			"request": request,
+			"replies": replies,
+		})
+	}
+}

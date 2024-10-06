@@ -28,14 +28,15 @@ func Init(r *gin.Engine) {
 	}
 	r.GET("/api/user/feedback", controllers.GetAllRequests)
 	r.GET("/api/feedback", controllers.GetSelectedFeedback)
+	r.GET("/api/feedback/:id", controllers.GetSpecificRequest)
 
 	const feedback = "/api/feedback"
-	apiReply := r.Group(feedback)
+	apiFeedback := r.Group(feedback)
 	{
-		apiReply.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath()) //
-		apiReply.POST(":id/reply", controllers.ReplyRequest)
-		apiReply.PUT(":id/admin", controllers.HandleRequest)
-		apiReply.PUT(":id/evaluation", controllers.Evaluation)
-		apiReply.PUT(":id/mark", controllers.MarkRequest)
+		apiFeedback.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath()) //
+		apiFeedback.POST(":id/reply", controllers.ReplyRequest)
+		apiFeedback.PUT(":id/admin", controllers.HandleRequest)
+		apiFeedback.PUT(":id/evaluation", controllers.Evaluation)
+		apiFeedback.PUT(":id/mark", controllers.MarkRequest)
 	}
 }
