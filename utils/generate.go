@@ -12,7 +12,7 @@ func GenerateJWT(userID string, userType int) string {
 		"authorized": true,
 		"user_id":    userID,
 		"type":       userType,
-		"exp":        time.Now().Add(time.Hour * 1).Unix(),
+		"exp":        time.Now().Add(time.Hour * 24 * 3).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(config.Config.GetString("jwt.secret")))
