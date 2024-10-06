@@ -121,6 +121,73 @@ func GetAllRequests(ctx *gin.Context) {
 	}
 }
 
+// 获取选取过的反馈列表
+func GetSelectedFeedback(ctx *gin.Context) {
+	pageStr := ctx.Query("page")
+	perPageStr := ctx.Query("limit")
+	status := ctx.Query("status")   // 0未处理 >=1已处理
+	rubbish := ctx.Query("rubbish") // 0垃圾 >=1还不是垃圾
+
+	//默认值设置 pageStr=1，perPageStr=15，status=0（未处理），rubbish=1（不是垃圾）
+	if "" == pageStr {
+		pageStr = "1"
+	}
+
+	if "" == perPageStr {
+		perPageStr = "15"
+	}
+
+	if "" == status {
+		status = "0"
+	}
+
+	if "" == rubbish {
+		rubbish = "1"
+	}
+
+	// ... 页面参数转换 ...
+	page, err1 := strconv.Atoi(pageStr)       // 将 page 字符串转换为整数
+	perPage, err2 := strconv.Atoi(perPageStr) // 将 per_page 字符串转换为整数
+	state, err3 := strconv.Atoi(status)
+	if_rubbish, err4 := strconv.Atoi(rubbish)
+	if err1 != nil || err2 != nil || err3 != nil || err4 != nil {
+		// 处理错误
+		utils.LogError(err1)
+		utils.LogError(err2)
+		utils.LogError(err3)
+		utils.LogError(err4)
+		utils.JsonResponse(ctx, 200, 200515, "错误在输入。。。我们正在让一切重回正轨", nil)
+	} // 这一串错误处理有没有更优雅的方法？
+	if page <= 0 {
+		page = 1 //数值不对的情况下默认设置
+	}
+
+	if perPage <= 0 {
+		perPage = 15
+	}
+
+	if state != 0 {
+		state = 1
+	}
+
+	if state != 0 { //
+		state = 1
+	} //已处理的
+
+	offset := (page - 1) * perPage // 计算偏移量
+	requests, err := services.GetSelectRequests(offset, perPage, if_rubbish, state)
+	if err != nil {
+		utils.LogError(err)
+		utils.JsonResponse(ctx, 200, 200504, "服务器出错，我们都有不顺利的时候，尝试在晚点", nil)
+	} else {
+		if len(requests) == 0 {
+			utils.JsonResponse(ctx, 200, 200200, "还没有发过哦", nil)
+		} else {
+			utils.JsonResponse(ctx, 200, 200200, "success", requests)
+		}
+	}
+}
+
 // 接单函数
 // 处理请求
 func HandleRequest(ctx *gin.Context) {
@@ -166,8 +233,8 @@ func HandleRequest(ctx *gin.Context) {
 		return
 	}
 
-	// 判断当前用户是否已处理过该反馈ID
-	if existUserID != "" && existUserID != currentUserID {
+	// 判断是不是有人已经处理过这个反馈了
+	if existUserID != "null" && existUserID != currentUserID {
 		utils.JsonResponse(ctx, 200, 200511, "有人在你之前遇见了！", nil)
 		return
 	}
@@ -192,7 +259,7 @@ func HandleRequest(ctx *gin.Context) {
 		utils.JsonResponse(ctx, 200, 200200, "处理成功", nil)
 	case 0:
 		// 取消处理请求
-		err1 := services.HandleRequest(intFeedbackID, "")
+		err1 := services.HandleRequest(intFeedbackID, "null")
 		err2 := services.UpdateAdminHaddone(currentUserID, -1)
 		// 如果处理过程中出现错误，返回错误信息
 		if err1 != nil || err2 != nil {
@@ -255,6 +322,7 @@ func Evaluation(ctx *gin.Context) {
 	// 如果用户类型为1-且---------请求的执行者id---------不为null-且-请求不是垃圾请求-----------------且----当前用户id----------等于请求的用户id
 	if userType == 1 && currentRequest.UndertakerID != "null" && currentRequest.IfRubbish != 0 && currentRequest.UserID == currentUserID {
 		// 更新请求的评分和评分内容
+		currentRequest.Status = true //改为已处理，最后一步在用户这里
 		currentRequest.Grade = input.Grade
 		currentRequest.GradeContent = input.GradeContent
 		// 更新请求的评分
@@ -273,7 +341,7 @@ func Evaluation(ctx *gin.Context) {
 	// 更新执行者的评分
 	if err := services.UpdateAdminEvaluation(currentRequest.UndertakerID, input.Grade); err != nil {
 		utils.LogError(err)
-		utils.JsonResponse(ctx, 200, 200513, "数据库出现在问题", nil)
+		utils.JsonResponse(ctx, 200, 200513, "数据库出现在更新管理员问题", nil)
 		return
 	}
 }
