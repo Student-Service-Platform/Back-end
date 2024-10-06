@@ -55,7 +55,7 @@ func CreateRequest(ctx *gin.Context) {
 			Description:  request.Description,
 			Category:     request.Category,
 			Urgency:      urgent,
-			UndertakerID: "",
+			UndertakerID: "null",
 			IsAnonymous:  request.IsAnonymous,
 			IfRubbish:    1,
 			Status:       true,
