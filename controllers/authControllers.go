@@ -109,6 +109,7 @@ func Login(ctx *gin.Context) {
 			if !flag {
 				utils.JsonResponse(ctx, 200, 200504, "你这密码有问题啊", nil)
 			} else {
+				ctx.SetCookie("user_id", data.UserID, 3600000, "/", "localhost", false, false)
 				utils.JsonResponse(ctx, 200, 200200, "登录成功", gin.H{
 					"user_id": user.UserID,
 					"type":    user.Type,

@@ -21,7 +21,7 @@ type createRequest struct {
 	Title       string `json:"title"`
 	Category    int    `json:"category"`
 	Description string `json:"description"`
-	IsUrgent    int    `json:"is_urgent"`
+	IsUrgent    bool   `json:"is_urgent"`
 	IsAnonymous bool   `json:"is_anonymous"`
 }
 
@@ -43,13 +43,19 @@ func CreateRequest(ctx *gin.Context) {
 			utils.JsonResponse(ctx, 200, 200503, "标题和描述不能为空", nil)
 			return
 		}
+		var urgent int
+		if request.IsUrgent {
+			urgent = 1
+		} else {
+			urgent = 0
+		}
 		err = services.CreateRequest(models.Request{
 			UserID:       currentUserID,
 			Title:        request.Title,
 			Description:  request.Description,
 			Category:     request.Category,
-			Urgency:      request.IsUrgent,
-			UndertakerID: "null",
+			Urgency:      urgent,
+			UndertakerID: "",
 			IsAnonymous:  request.IsAnonymous,
 			IfRubbish:    1,
 			Status:       true,

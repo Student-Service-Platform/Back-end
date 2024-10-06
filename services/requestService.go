@@ -18,6 +18,7 @@ func CreateRequest(newRequest models.Request) error {
 // 获取Request
 // 定义一个结构体RequestInfo，用于存储请求信息
 type RequestInfo struct {
+	Id          uint      `json:"id"`          // 帖子id
 	Username    string    `json:"username"`    // 请求者用户名
 	CreatedAt   time.Time `json:"created_at"`  // 请求创建时间
 	Title       string    `json:"title"`       // 请求标题
@@ -63,6 +64,7 @@ func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
 
 		// 创建RequestInfo结构体
 		requestInfo := RequestInfo{
+			Id:          req.ID,
 			Username:    username,
 			CreatedAt:   req.CreatedAt,
 			Title:       req.Title,
