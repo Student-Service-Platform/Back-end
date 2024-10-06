@@ -197,6 +197,7 @@ func GetAllRubbish(offset, limit int) ([]RequestInfo, error) {
 }
 
 type SelectedRequest struct {
+	Id           uint      `json:"id"`            // id
 	Title        string    `json:"title"`         // 请求标题
 	Username     string    `json:"username"`      // 请求者用户名
 	CreatedAt    time.Time `json:"created_at"`    // 请求创建时间
@@ -248,6 +249,7 @@ func GetSelectRequests(offset, limit, irb, status int) ([]SelectedRequest, error
 		// Create a new request information object
 		requestInfo := SelectedRequest{
 			Username:     username,
+			Id:           req.ID,
 			CreatedAt:    req.CreatedAt,
 			Title:        req.Title,
 			Description:  req.Description,
