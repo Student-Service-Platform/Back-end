@@ -9,3 +9,10 @@ enccryptokey: "12345678901234567890123456789012"
 
 jwt:
   secret: this_is_a_secret_sample
+
+cookies:
+  maxAge: 60*60*24*3
+  path: /
+  daomain: "localhost"
+  secure: false
+  httpOnly: false

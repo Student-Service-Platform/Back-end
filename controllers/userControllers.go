@@ -89,6 +89,41 @@ func UpdateProfile(ctx *gin.Context) {
 	fmt.Println(table)
 	switch data.Object {
 	case "username", "password", "mail", "phone", "avatar":
+
+		switch data.Object {
+		case "username":
+			if data.NewValue == "" || data.NewValue == "匿名用户" {
+				utils.JsonResponse(ctx, 200, 200506, "你小子，用户名有问题", nil)
+				return
+			}
+			break
+		case "password":
+			if len(data.NewValue) < 8 || len(data.NewValue) > 16 {
+				utils.JsonResponse(ctx, 200, 200502, "你小子，密码长度有问题啊", nil)
+				return
+			}
+			break
+		case "mail":
+			if !utils.IsValidMail(data.NewValue) {
+				utils.JsonResponse(ctx, 200, 200506, "你小子，邮箱有问题啊", nil)
+				return
+			}
+			break
+		case "phone":
+			if !utils.IsValidPhone(data.NewValue) {
+				utils.JsonResponse(ctx, 200, 200506, "你小子，手机号有问题啊", nil)
+				return
+			}
+			break
+		case "avatar":
+			if !utils.IsValidURL(data.NewValue) {
+				utils.JsonResponse(ctx, 200, 200506, "你小子，连个图片链接都传不明白？", nil)
+				return
+			}
+		default:
+			utils.JsonResponse(ctx, 200, 200508, "让我们重回正轨！请选择有效的修改字段。", nil)
+		}
+
 		err = services.UpdateProfile(currentUserID, table, data.Object, data.NewValue)
 		if err != nil {
 			utils.LogError(err)

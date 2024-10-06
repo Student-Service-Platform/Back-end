@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"Back-end/config"
 	"Back-end/services"
 	"Back-end/utils"
 	"strconv"
@@ -31,40 +32,65 @@ func Register(ctx *gin.Context) {
 		return
 	}
 
-	// 检查学号是否合法（纯数字）
-	getint, err := strconv.Atoi(data.UserID)
-	if err != nil {
-		utils.JsonResponse(ctx, 200, 200501, "你这学号有问题啊", nil)
+	// 将字符串UserID转换为整数
+	userIDInt, err := strconv.Atoi(data.UserID)
+	// 如果转换失败或者UserID小于等于0，则返回错误
+	if err != nil || userIDInt <= 0 {
+		utils.JsonResponse(ctx, 200, 200501, "你这学号有问题啊", err)
 		utils.LogError(err)
-	} else if getint <= 0 {
-		utils.JsonResponse(ctx, 200, 200501, "你这学号有问题啊", nil)
-	} else { //确定学号没问题之后检验密码
-		if len(data.Password) < 8 || len(data.Password) > 16 {
-			utils.JsonResponse(ctx, 200, 200502, "你这密码有问题啊", nil)
-		} else {
-			//检验是否存在
-			err = services.CheckUserExistByUserID(data.UserID, "students")
-			if err != nil && err != gorm.ErrRecordNotFound { //如果发生了错误
-				utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", nil)
-			} else if err == nil { //如果找到了
-				utils.JsonResponse(ctx, 200, 200504, "你这学号已经被注册了", nil)
-			} else {
-				//补齐struct然后塞进去，这里只负责传入相关信息
-				if data.Mail == "" {
-					utils.JsonResponse(ctx, 200, 200503, "你这邮箱有问题啊", nil)
-				} else {
-					err = services.AddStudent(data.UserID, data.Username, data.Password, data.Phone, data.Mail)
-					if err != nil {
-						utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", nil)
-						utils.LogError(err)
-					} else {
-						utils.JsonResponse(ctx, 200, 200200, "注册成功", nil)
-					}
-				}
-			}
-		}
+		return
 	}
 
+	// 如果密码长度不在8到16位之间，则返回错误
+	if len(data.Password) < 8 || len(data.Password) > 16 {
+		utils.JsonResponse(ctx, 200, 200502, "你这密码长度有问题啊", nil)
+		return
+	}
+
+	// 根据UserID检查用户是否存在
+	err = services.CheckUserExistByUserID(data.UserID, "students")
+	// 如果存在，则返回错误
+	if err != nil {
+		switch {
+		case err == gorm.ErrRecordNotFound:
+
+			if data.Username == "" || data.Username == "匿名用户" {
+				utils.JsonResponse(ctx, 200, 200506, "你小子，用户名有问题", nil)
+				return
+			}
+			// 如果邮箱格式不正确，则返回错误
+			if !utils.IsValidMail(data.Mail) {
+				utils.JsonResponse(ctx, 200, 200503, "你这邮箱有问题啊", nil)
+				return
+			}
+
+			// 如果手机号格式不正确，则返回错误
+			if !utils.IsValidPhone(data.Phone) {
+				utils.JsonResponse(ctx, 200, 200503, "你这手机号有问题啊", nil)
+				return
+			}
+
+			// 添加学生信息
+			err = services.AddStudent(data.UserID, data.Username, data.Password, data.Phone, data.Mail)
+			// 如果添加失败，则返回错误
+			if err != nil {
+				utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", err)
+				utils.LogError(err)
+				return
+			}
+
+			// 返回成功
+			utils.JsonResponse(ctx, 200, 200200, "注册成功", nil)
+		default:
+			utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", err)
+			utils.LogError(err)
+			return
+		}
+	} else {
+		// 如果学生信息已存在，则返回错误
+		utils.JsonResponse(ctx, 200, 200504, "你这学号已经被注册了", nil)
+		return
+	}
 }
 
 // 登录功能↓
@@ -114,7 +140,13 @@ func Login(ctx *gin.Context) {
 			if !flag {
 				utils.JsonResponse(ctx, 200, 200504, "你这密码有问题啊", nil)
 			} else {
-				ctx.SetCookie("user_id", data.UserID, 60*60*24*3, "/", "localhost", false, false)
+				ctx.SetCookie(
+					"user_id", data.UserID,
+					config.Config.GetInt("cookies.maxAge"),
+					config.Config.GetString("cookies.path"),
+					config.Config.GetString("cookies.domain"),
+					config.Config.GetBool("cookies.secure"),
+					config.Config.GetBool("cookies.httpOnly"))
 				utils.JsonResponse(ctx, 200, 200200, "登录成功", gin.H{
 					"user_id": user.UserID,
 					"type":    user.Type,

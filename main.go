@@ -13,6 +13,7 @@ import (
 
 func main() {
 	database.Init()
+	services.InitUserAccount()
 	r := gin.Default()
 	router.Init(r)
 
@@ -22,5 +23,4 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to start server")
 	}
 
-	services.InitUserAccount()
 }

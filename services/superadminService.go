@@ -73,3 +73,57 @@ func DelUser(userID string, table string) error {
 
 	return nil
 }
+
+type getusers struct {
+	UserID   string
+	UserName string
+	Password string
+	Mail     string
+	Phone    string
+	IfDel    bool
+}
+
+func GetAll(table string, offset int, limit int) ([]getusers, error) {
+
+	if table == "admins" {
+		var Users []models.Admin
+		if err := database.DB.Offset(offset).Limit(limit).
+			Find(&Users).Error; err != nil {
+			return nil, err
+		}
+		var UserInfos []getusers
+		for _, req := range Users {
+			userInfo := getusers{
+				UserID:   req.UserID,
+				UserName: req.Username,
+				Password: req.Password,
+				Mail:     req.Mail,
+				Phone:    req.Phone,
+				IfDel:    req.IfDel,
+			}
+			UserInfos = append(UserInfos, userInfo)
+		}
+		return UserInfos, nil
+	} else {
+		var Users []models.Student
+		if err := database.DB.Offset(offset).Limit(limit).
+			Find(&Users).Error; err != nil {
+			return nil, err
+		}
+		var UserInfos []getusers
+		for _, req := range Users {
+			userInfo := getusers{
+				UserID:   req.UserID,
+				UserName: req.Username,
+				Password: req.Password,
+				Mail:     req.Mail,
+				Phone:    req.Phone,
+				IfDel:    req.IfDel,
+			}
+			UserInfos = append(UserInfos, userInfo)
+		}
+		return UserInfos, nil
+	}
+}
+
+//Format("2006-01-02 15:04"),
