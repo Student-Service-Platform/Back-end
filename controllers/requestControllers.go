@@ -32,15 +32,17 @@ func CreateRequest(ctx *gin.Context) {
 		return
 	}
 	var request createRequest
-	err = ctx.ShouldBindJSON(&request)
-	if err != nil {
+	if err := ctx.ShouldBindJSON(&request); err != nil {
 		utils.LogError(err)
 		utils.JsonResponse(ctx, 200, 200503, "参数错误", nil)
 		return
 	}
-
 	switch userType {
 	case 1: // 普通账户
+		if request.Title == "" || request.Description == "" {
+			utils.JsonResponse(ctx, 200, 200503, "标题和描述不能为空", nil)
+			return
+		}
 		err = services.CreateRequest(models.Request{
 			UserID:       currentUserID,
 			Title:        request.Title,
@@ -59,7 +61,7 @@ func CreateRequest(ctx *gin.Context) {
 		} else {
 			utils.JsonResponse(ctx, 200, 200200, "创建成功", nil)
 		}
-	case 2, 3: //管理员账户
+	case 2, 3: // 管理员账户
 		utils.JsonResponse(ctx, 200, 200401, "客户端报告您可能不是普通人，换个账户试试", nil)
 	default:
 		utils.JsonResponse(ctx, 200, 200506, "你可能没有合适的权限，坐和放宽。", nil)
@@ -179,12 +181,12 @@ func GetSelectedFeedback(ctx *gin.Context) {
 	if err != nil {
 		utils.LogError(err)
 		utils.JsonResponse(ctx, 200, 200504, "服务器出错，我们都有不顺利的时候，尝试在晚点", nil)
+		return
+	}
+	if len(requests) == 0 {
+		utils.JsonResponse(ctx, 200, 200200, "还没有发过哦", nil)
 	} else {
-		if len(requests) == 0 {
-			utils.JsonResponse(ctx, 200, 200200, "还没有发过哦", nil)
-		} else {
-			utils.JsonResponse(ctx, 200, 200200, "success", requests)
-		}
+		utils.JsonResponse(ctx, 200, 200200, "success", requests)
 	}
 }
 
@@ -408,7 +410,7 @@ func GetSpecificRequest(ctx *gin.Context) {
 		return
 	}
 
-	request, err1 := services.GetRequestByID(intID)
+	request, err1 := services.GetSmallRequestByID(intID)
 	replies, err2 := services.GetRepliesByRequestID(intID)
 	if err1 != nil && err2 != nil {
 		utils.JsonResponse(ctx, 200, 200200, "success", gin.H{
@@ -419,9 +421,10 @@ func GetSpecificRequest(ctx *gin.Context) {
 	} else {
 		utils.LogError(err1)
 		utils.LogError(err2)
-		utils.JsonResponse(ctx, 200, 200517, "好像有点问题", gin.H{
+		utils.JsonResponse(ctx, 200, 200517, "好像有点问题，但不大", gin.H{
 			"request": request,
 			"replies": replies,
 		})
+		return
 	}
 }

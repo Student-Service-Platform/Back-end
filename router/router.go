@@ -29,6 +29,7 @@ func Init(r *gin.Engine) {
 	r.GET("/api/user/feedback", controllers.GetAllRequests)
 	r.GET("/api/feedback", controllers.GetSelectedFeedback)
 	r.GET("/api/feedback/:id", controllers.GetSpecificRequest)
+	r.GET("/api/feedback/select", controllers.GetSelectedFeedback)
 
 	const feedback = "/api/feedback"
 	apiFeedback := r.Group(feedback)

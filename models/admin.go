@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 // Admin 管理员
 type Admin struct {
 	gorm.Model         // 自行管理的created_at, updated_at, deleted_at
-	UserID     string  `json:"user_id" gorm:"type:varchar(100);uniqueIndex"`
+	UserID     string  `json:"user_id" gorm:"type:varchar(100);uniqueIndex:idx_adminuid"`
 	Username   string  `json:"username"`
 	Password   string  `json:"-"`
 	Phone      string  `json:"phone"`

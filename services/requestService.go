@@ -29,41 +29,39 @@ type RequestInfo struct {
 	Status      bool      `json:"status"`      // 请求状态
 }
 
-// GetAllRequests retrieves all requests from the database, with an optional offset and limit.
+// GetAllRequests 获取所有请求，不需要登录
+// GetAllRequests 获取所有请求
 func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
-	// Define a variable to store the requests
+	// 定义一个Request类型的切片
 	var requests []models.Request
-	// Retrieve requests from the database with an offset and limit
+	// 查询数据库，设置偏移量和限制数量，预加载学生和管理员信息，将查询结果赋值给requests
 	if err := database.DB.Offset(offset).Limit(limit).
-		// Preload the student information
-		Preload("Student", "user_id = ?", "user_id").
-		// Preload the admin information
-		Preload("Admin", "user_id = ?", "undertaker_id").
-		// Find the requests
+		Preload("Student").
+		Preload("Admin").
 		Find(&requests).Error; err != nil {
-		// Return an error if the request fails
+		// 如果查询失败，返回错误
 		return nil, err
 	}
 
-	// Define a variable to store the request information
+	// 定义一个RequestInfo类型的切片
 	var requestInfos []RequestInfo
-	// Iterate through the requests
+	// 遍历requests切片
 	for _, req := range requests {
-		// Set the username to the student's username
+		// 获取学生用户名
 		username := req.Student.Username
-		// If the request is anonymous, set the username to "匿名用户"
+		// 如果请求是匿名的，则用户名为匿名用户
 		if req.IsAnonymous {
 			username = "匿名用户"
 		}
 
-		// Set the undertaker to an empty string
+		// 获取管理员用户名
 		undertaker := ""
-		// If the undertaker ID is not "null", set the undertaker to the admin's username
-		if "null" != req.UndertakerID {
+		// 如果undertakerID不为null，则获取管理员用户名
+		if req.UndertakerID != "null" {
 			undertaker = req.Admin.Username
 		}
 
-		// Create a new request information object
+		// 创建RequestInfo结构体
 		requestInfo := RequestInfo{
 			Username:    username,
 			CreatedAt:   req.CreatedAt,
@@ -75,11 +73,11 @@ func GetAllRequests(offset, limit int) ([]RequestInfo, error) {
 			Undertaker:  undertaker,
 			Status:      req.Status,
 		}
-		// Append the request information to the request information array
+		// 将RequestInfo结构体添加到requestInfos切片中
 		requestInfos = append(requestInfos, requestInfo)
 	}
 
-	// Return the request information array
+	// 返回requestInfos切片和nil错误
 	return requestInfos, nil
 }
 
@@ -257,6 +255,64 @@ func GetRequestByID(requestID int) (models.Request, error) {
 	var request models.Request
 	result := database.DB.Where("id = ?", requestID).Find(&request)
 	return request, result.Error
+}
+
+type SmallRequest struct {
+	Username     string    `json:"username"`
+	CreatedAt    time.Time `json:"created_at"`
+	Title        string    `json:"title"`
+	Description  string    `json:"description"`
+	Category     int       `json:"category"`
+	Urgency      int       `json:"urgency"`
+	Grade        int       `json:"grade"`
+	GradeContent string    `json:"grade_content"`
+	Undertaker   string    `json:"undertaker"`
+}
+
+func GetSmallRequestByID(requestID int) (SmallRequest, error) {
+	var request models.Request
+	result := database.DB.Where("id = ?", requestID).Find(&request)
+	if result.Error != nil {
+		utils.LogError(result.Error)
+		return SmallRequest{}, result.Error
+	}
+
+	var StdName string
+	var std models.Student
+	result = database.DB.Where("user_id = ?", request.UserID).Find(&std)
+	if result.Error != nil {
+		utils.LogError(result.Error)
+		return SmallRequest{}, result.Error
+	}
+
+	StdName = std.Username
+
+	var undertakerName string
+	if request.UndertakerID != "null" && request.UndertakerID != "" {
+		var udt models.Admin
+		result = database.DB.Where("user_id = ?", request.UndertakerID).Find(&udt)
+		if result.Error != nil {
+			utils.LogError(result.Error)
+			return SmallRequest{}, result.Error
+		}
+		undertakerName = udt.Username
+	} else {
+		undertakerName = ""
+	}
+
+	smrequest := SmallRequest{
+		Username:     StdName,
+		CreatedAt:    request.CreatedAt,
+		Title:        request.Title,
+		Description:  request.Description,
+		Category:     request.Category,
+		Urgency:      request.Urgency,
+		Grade:        request.Grade,
+		GradeContent: request.GradeContent,
+		Undertaker:   undertakerName,
+	}
+
+	return smrequest, nil
 }
 
 // 提交对于回复的评价

@@ -41,13 +41,14 @@ func GetRepliesByRequestID(request_id int) ([]TinyReply, error) {
 	for i, reply := range replies {
 		respondentIDs[i] = reply.Respondent
 	}
+
 	// Student列表
 	var students []models.Student
-	database.DB.Where("id IN ?", respondentIDs).Find(&students)
+	database.DB.Where("user_id IN ?", respondentIDs).Find(&students)
 
 	// Admin列表
 	var admins []models.Admin
-	database.DB.Where("id IN ?", respondentIDs).Find(&admins)
+	database.DB.Where("user_id IN ?", respondentIDs).Find(&admins)
 
 	// 创建一个map来存储user_id到username的映射
 	usernameMap := make(map[string]string)

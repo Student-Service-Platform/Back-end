@@ -10,5 +10,5 @@ type Reply struct {
 	Father     int64  `json:"father"`     //小林给个注释看,0Request,1Reply?
 	Content    string `json:"content"`    // 回复内容
 	Respondent string `json:"respondent"` // 回复者id
-	User       User   //联合类型接口
+	// User       User   //联合类型接口
 }
