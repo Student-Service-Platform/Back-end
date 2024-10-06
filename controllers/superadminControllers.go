@@ -60,29 +60,23 @@ func Admin_Register(ctx *gin.Context) {
 	}
 }
 
-type DelUser struct {
-	UserID string `json:"user_id"   binding:"required"`
-}
-
 func Del(ctx *gin.Context) {
-	var data DelUser
-	err := ctx.ShouldBindJSON(&data)
-	if err != nil {
-		utils.LogError(err)
+	DelUser := ctx.Query("UserID")
+	if DelUser == "" {
 		utils.JsonResponse(ctx, 200, 200503, "参数错误", nil)
 		return
 	}
 	var table string
-	if data.UserID[0] == 'A' {
+	if DelUser[0] == 'A' {
 		table = "admins"
 	} else {
 		table = "students"
 	}
-	err = services.CheckUserExistByUserID(data.UserID, table)
+	err := services.CheckUserExistByUserID(DelUser, table)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", nil)
 	} else if err == nil { //如果找到了
-		err = services.DelUser(data.UserID, table)
+		err = services.DelUser(DelUser, table)
 		if err != nil {
 			utils.JsonResponse(ctx, 200, 200503, "你今天有点问题啊(bushi)，咱遇到了点问题，晚点再试吧", nil)
 			utils.LogError(err)
