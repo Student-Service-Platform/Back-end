@@ -27,7 +27,6 @@ func Init(r *gin.Engine) {
 		// 其他受保护的路由可以在这里添加
 	}
 	r.GET("/api/user/feedback", controllers.GetAllRequests)
-	r.GET("/api/feedback", controllers.GetSelectedFeedback)
 	r.GET("/api/feedback/:id", controllers.GetSpecificRequest)
 	r.GET("/api/feedback/select", controllers.GetSelectedFeedback)
 
