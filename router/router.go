@@ -46,12 +46,11 @@ func Init(r *gin.Engine) {
 	{
 		// apiSuperAdmin.POST("")
 		apiSuperAdmin.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath()) //
+		apiSuperAdmin.GET("U&A", controllers.GetUandA)
 		apiSuperAdmin.POST("workbench", controllers.Admin_Register)
 		apiSuperAdmin.DELETE("workbench", controllers.Del)
 		apiSuperAdmin.GET("workbench", controllers.GetRubbish)
 		apiSuperAdmin.PUT("workbench", controllers.UpdateRubbish)
-		// apiSuperAdmin.PUT(":id/admin", controllers.HandleRequest)
-		// apiSuperAdmin.PUT(":id/evaluation", controllers.Evaluation)
-		// apiSuperAdmin.PUT(":id/mark", controllers.MarkRequest)
+
 	}
 }
