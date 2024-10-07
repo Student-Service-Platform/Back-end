@@ -19,7 +19,7 @@ type registerData struct {
 	Password string `json:"password" binding:"required"`
 	MailAuth bool   `json:"mail_auth"` //还没弄完
 	Phone    string `json:"phone"`
-	Mail     string `json:"mail" binding:"required"`
+	Mail     string `json:"mail"`
 }
 
 func Register(ctx *gin.Context) {
