@@ -76,7 +76,7 @@ func Del(ctx *gin.Context) {
 		return
 	}
 	var table string
-	if DelUser[0] == 'A' {
+	if DelUser[0] == 'a' {
 		table = "admins"
 	} else {
 		table = "students"
