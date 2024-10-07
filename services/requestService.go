@@ -312,6 +312,7 @@ func GetRequestByID(requestID int) (models.Request, error) {
 }
 
 type SmallRequest struct {
+<<<<<<< Updated upstream
 	Username     string `json:"username"`
 	CreatedAt    string `json:"created_at"`
 	Title        string `json:"title"`
@@ -321,6 +322,18 @@ type SmallRequest struct {
 	Grade        int    `json:"grade"`
 	GradeContent string `json:"grade_content"`
 	Undertaker   string `json:"undertaker"`
+=======
+	Username     string    `json:"username"`
+	CreatedAt    time.Time `json:"created_at"`
+	Title        string    `json:"title"`
+	Description  string    `json:"description"`
+	Category     int       `json:"category"`
+	Urgency      int       `json:"urgency"`
+	Grade        int       `json:"grade"`
+	GradeContent string    `json:"grade_content"`
+	Undertaker   string    `json:"undertaker"`
+	Status       bool      `json:"status"`
+>>>>>>> Stashed changes
 }
 
 func GetSmallRequestByID(requestID int) (SmallRequest, error) {
@@ -364,6 +377,7 @@ func GetSmallRequestByID(requestID int) (SmallRequest, error) {
 		Grade:        request.Grade,
 		GradeContent: request.GradeContent,
 		Undertaker:   undertakerName,
+		Status:       request.Status,
 	}
 
 	return smrequest, nil
