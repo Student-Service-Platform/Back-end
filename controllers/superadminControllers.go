@@ -21,6 +21,10 @@ type AdminRegister struct {
 }
 
 func Admin_Register(ctx *gin.Context) {
+	if ctx.GetInt("type") != 3 { // 筛选超管请求
+		utils.JsonResponse(ctx, 401, 401, "权限不足", nil)
+		return
+	}
 
 	var data AdminRegister
 	// 解析参数并且绑定到 struct 中
@@ -33,7 +37,7 @@ func Admin_Register(ctx *gin.Context) {
 
 	// 检查管理员id是否合法（A+字符串）
 
-	if data.AdminID[0] != 'A' {
+	if data.AdminID[0] != 'a' {
 		utils.JsonResponse(ctx, 200, 200501, "你这id有问题啊", nil)
 		utils.LogError(err)
 	} else { //确定工号没问题之后检验密码
@@ -61,6 +65,11 @@ func Admin_Register(ctx *gin.Context) {
 }
 
 func Del(ctx *gin.Context) {
+	if ctx.GetInt("type") != 3 { // 筛选超管请求
+		utils.JsonResponse(ctx, 401, 401, "权限不足", nil)
+		return
+	}
+
 	DelUser := ctx.Query("UserID")
 	if DelUser == "" {
 		utils.JsonResponse(ctx, 200, 200503, "参数错误", nil)
@@ -87,6 +96,11 @@ func Del(ctx *gin.Context) {
 }
 
 func GetRubbish(ctx *gin.Context) {
+	if ctx.GetInt("type") != 3 { // 筛选超管请求
+		utils.JsonResponse(ctx, 401, 401, "权限不足", nil)
+		return
+	}
+
 	pageStr := ctx.Query("page")
 	perPageStr := ctx.Query("limit")
 
@@ -128,6 +142,11 @@ func GetRubbish(ctx *gin.Context) {
 // 审批垃圾反馈
 
 func UpdateRubbish(ctx *gin.Context) {
+	if ctx.GetInt("type") != 3 { // 筛选超管请求
+		utils.JsonResponse(ctx, 401, 401, "权限不足", nil)
+		return
+	}
+
 	strID := ctx.Query("id")
 	strAction := ctx.Query("action")
 
