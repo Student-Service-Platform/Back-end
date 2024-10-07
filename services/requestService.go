@@ -106,21 +106,15 @@ func GetRequestsByUserID(targetUserID string, offset, limit int) ([]RequestInfo,
 	var requestInfos []RequestInfo
 	// 遍历查询到的请求
 	for _, req := range requests {
-
-		// 定义一个Admin变量，用于存储 undertaker 信息
-		var admin models.Admin
-		// 如果请求的 undertakerID 不为 "null"，则查询 undertaker 信息
+		// 定义一个 undertaker 变量，用于存储 undertaker 用户名
+		undertaker := ""
+		// 如果请求的 undertakerID 不为null，则查询 undertaker 信息
 		if req.UndertakerID != "null" {
+			var admin models.Admin
 			if err := database.DB.Where("user_id = ?", req.UndertakerID).First(&admin).Error; err != nil {
 				// 如果查询失败，返回错误
 				return nil, err
 			}
-		}
-
-		// 定义一个 undertaker 变量，用于存储 undertaker 用户名
-		undertaker := ""
-		// 如果请求的 undertakerID 不为 "null"，则将 undertaker 用户名赋值给 undertaker 变量
-		if req.UndertakerID != "null" {
 			undertaker = admin.Username
 		}
 
