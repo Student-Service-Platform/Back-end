@@ -52,4 +52,10 @@ func Init(r *gin.Engine) {
 		apiSuperAdmin.PUT("workbench", controllers.UpdateRubbish)
 
 	}
+	apiGuard := r.Group("/api/guard")
+	{
+		apiGuard.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath())
+		apiGuard.POST("/", controllers.BelongsTo)
+	}
+
 }

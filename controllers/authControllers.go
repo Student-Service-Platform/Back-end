@@ -147,6 +147,8 @@ func Login(ctx *gin.Context) {
 					config.Config.GetString("cookies.domain"),
 					config.Config.GetBool("cookies.secure"),
 					config.Config.GetBool("cookies.httpOnly"))
+				ctx.Set("userID", user.UserID)
+				ctx.Set("type", user.Type)
 				utils.JsonResponse(ctx, 200, 200200, "登录成功", gin.H{
 					"user_id": user.UserID,
 					"type":    user.Type,
