@@ -185,6 +185,11 @@ func UpdateRubbish(ctx *gin.Context) {
 }
 
 func GetUandA(ctx *gin.Context) {
+	if ctx.GetInt("type") != 3 { // 筛选超管请求
+		utils.JsonResponse(ctx, 401, 401, "权限不足", nil)
+		return
+	}
+
 	table := ctx.Query("type")
 	pageStr := ctx.Query("page")
 	perPageStr := ctx.Query("limit")
