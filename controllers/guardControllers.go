@@ -10,11 +10,11 @@ func BelongsTo(c *gin.Context) {
 	userType := c.GetInt("type")
 
 	var t struct {
-		userType int `json:"user_type"`
+		UserType int `json:"user_type"`
 	}
 	c.ShouldBind(&t)
 
-	if t.userType != userType {
+	if t.UserType != userType {
 		utils.JsonResponse(c, 200, 200403, "拒绝访问", nil)
 		return
 	}

@@ -48,7 +48,7 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		fmt.Println("Received Token:", tokenString) // 打印接收到的token
 		if tokenString == "" {
 			// 如果 Authorization 字段为空，返回 401 Unauthorized 错误
-			c.JSON(200, gin.H{"code": 200401, "data": nil, "msg": "未登录"})
+			c.JSON(401, gin.H{"code": 200401, "data": nil, "msg": "未登录"})
 			c.Abort()
 			return
 		}
@@ -58,7 +58,7 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		if err != nil || !token.Valid {
 			// 如果 JWT 验证失败，返回 401 Unauthorized 错误
 			utils.LogError(err)
-			c.JSON(200, gin.H{"code": 200401, "data": nil, "msg": "登录信息校验失败"})
+			c.JSON(401, gin.H{"code": 200401, "data": nil, "msg": "登录信息校验失败"})
 			c.Abort()
 			return
 		}
@@ -67,7 +67,7 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			// 如果 JWT 的 claims 无效，返回 401 Unauthorized 错误
-			c.JSON(200, gin.H{"code": 200401, "data": nil, "msg": "登录信息（claims）无效"})
+			c.JSON(401, gin.H{"code": 200401, "data": nil, "msg": "登录信息（claims）无效"})
 			c.Abort()
 			return
 		}
@@ -84,14 +84,14 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 			table = "admins"
 			break
 		default:
-			c.JSON(200, gin.H{"code": 200401, "data": nil, "msg": "登录信息（用户类型）无效"})
+			c.JSON(401, gin.H{"code": 200401, "data": nil, "msg": "登录信息（用户类型）无效"})
 			c.Abort()
 			return
 		}
 
 		if services.CheckUserExistByUserID(userID, table) != nil {
 			// 如果 user_id 不存在，返回 401 Unauthorized 错误
-			c.JSON(200, gin.H{"code": 200401, "data": nil, "msg": "登录信息（用户ID）无效"})
+			c.JSON(401, gin.H{"code": 200401, "data": nil, "msg": "登录信息（用户ID）无效"})
 			utils.LogError(err)
 			c.Abort()
 			return

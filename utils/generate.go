@@ -14,7 +14,7 @@ func GenerateJWT(userID string, userType int) string {
 		"authorized": true,
 		"user_id":    userID,
 		"type":       userType,
-		"exp":        time.Now().Add(time.Duration(config.Config.GetInt64("cookies.maxAge"))).Unix(),
+		"exp":        time.Now().Add(time.Duration(config.Config.GetInt64("cookies.maxAge")) * time.Second).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(config.Config.GetString("jwt.secret")))
