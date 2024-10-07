@@ -13,7 +13,7 @@ import (
 
 type AdminRegister struct {
 	AdminID  string `json:"admin_id"   binding:"required"`
-	Username string `json:"username"   binding:"required"`
+	Username string `json:"username"`
 	Password string `json:"password"  binding:"required"`
 	MailAuth bool   `json:"mail_auth"`
 	Phone    string `json:"phone"`

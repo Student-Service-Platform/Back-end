@@ -1,5 +1,9 @@
 # Back-end
 
+> [!IMPORTANT] 
+> 本地运行的时候，如果第一次运行，会在终端里输出超级管理员密码，请务必找到然后记录下来
+> 忘记了就没办法了
+
 ## config
 
 存放用来读取配置文件的config.go（用viper）
@@ -23,7 +27,11 @@
 |jsonResponse.go|格式化json输出|
 |crypto.go|加密/解密，密钥放在config.yaml里|
 
-- 后端如果有错误日志产生用zerolog搞定吧，初始化那些放在utils/logger.go里了
+- 后端如果有错误日志产生用zerolog搞定吧，初始化那些放在utils/logger.go里了，直接
+```go
+utils.LogError(err)
+```
+即可
 
 ## middleware
 
@@ -47,16 +55,14 @@
 
 静态文件，如icon，css，js等
 
-## upload
+## ~~upload~~
 
-上传的文件 暂时不知道是否使用这种形式。
+~~上传的文件 暂时不知道是否使用这种形式。~~
+
+就我们这小水管，用图床去
 
 
 ## To Dos
-
-各种数据校验
-
-注册保存手机号和邮箱
-
-奇怪的外键问题
+- [ ] 接单错误
+- [ ] 
 

@@ -44,7 +44,7 @@ func Init(r *gin.Engine) {
 	apiSuperAdmin := r.Group(superadmin)
 	{
 		// apiSuperAdmin.POST("")
-		apiSuperAdmin.Use(middlewares.TokenAuthMiddleware(), middlewares.ValidPath()) //
+		apiSuperAdmin.Use(middlewares.TokenAuthMiddleware()) //
 		apiSuperAdmin.GET("U&A", controllers.GetUandA)
 		apiSuperAdmin.POST("workbench", controllers.Admin_Register)
 		apiSuperAdmin.DELETE("workbench", controllers.Del)
