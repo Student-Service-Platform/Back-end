@@ -42,7 +42,7 @@ func GetProfile(ctx *gin.Context) {
 	}
 
 	if targetUserID != currentUserID {
-		utils.JsonResponse(ctx, 200, 200506, "你可能没有合适的权限，坐和放宽。", nil)
+		utils.JsonResponse(ctx, 403, 200506, "你可能没有合适的权限，坐和放宽。", nil)
 		return
 	}
 
@@ -52,7 +52,7 @@ func GetProfile(ctx *gin.Context) {
 
 	result, err = services.GetProfileByID(targetUserID, table)
 	if err != nil {
-		utils.JsonResponse(ctx, 200, 200506, "你可能没有合适的权限，坐和放宽。", nil)
+		utils.JsonResponse(ctx, 403, 200506, "你可能没有合适的权限，坐和放宽。", nil)
 	} else {
 		utils.JsonResponse(ctx, 200, 200200, "success", gin.H{
 			"user_id": result.UserID,
