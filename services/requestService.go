@@ -4,7 +4,6 @@ import (
 	"Back-end/database"
 	"Back-end/models"
 	"Back-end/utils"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -313,16 +312,16 @@ func GetRequestByID(requestID int) (models.Request, error) {
 }
 
 type SmallRequest struct {
-	Username     string    `json:"username"`
-	CreatedAt    time.Time `json:"created_at"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	Category     int       `json:"category"`
-	Urgency      int       `json:"urgency"`
-	Grade        int       `json:"grade"`
-	GradeContent string    `json:"grade_content"`
-	Undertaker   string    `json:"undertaker"`
-	Status       bool      `json:"status"`
+	Username     string `json:"username"`
+	CreatedAt    string `json:"created_at"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	Category     int    `json:"category"`
+	Urgency      int    `json:"urgency"`
+	Grade        int    `json:"grade"`
+	GradeContent string `json:"grade_content"`
+	Undertaker   string `json:"undertaker"`
+	Status       bool   `json:"status"`
 }
 
 func GetSmallRequestByID(requestID int) (SmallRequest, error) {
